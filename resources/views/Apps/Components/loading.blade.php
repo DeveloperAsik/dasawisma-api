@@ -1,0 +1,1 @@
+<img id="loading-animate" src="<?php echo $_config_img_url . 'loading/v2.gif'?>" style="display:none"/>

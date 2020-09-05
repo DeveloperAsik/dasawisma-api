@@ -1,0 +1,1 @@
+.stories.facesnap .story>a{text-decoration:none;color:#333}.stories.facesnap .story>a>.img{border-radius:50%;padding:3px;background:radial-gradient(ellipse at 70% 70%,#ff5bd8 42%,#7ab1ec 59%,#00fffd 0);}.stories.facesnap .story>a>.img>*{border-radius:50%;border:3px solid #282828}.stories.facesnap .story.seen{opacity:1}.stories.facesnap .story.seen>a>.img{background:#ffffff}

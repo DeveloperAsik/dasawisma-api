@@ -1,0 +1,40 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : Jul 3, 2020, 11:11:05 AM
+    Author     : root
+*/
+
+
+@font-face {
+    font-family: 'dsFontsDamionRegular';
+    src: url(../fonts/damion-regular-webfont.woff); /* IE9 Compat Modes */
+    src: url(../fonts/damion-regular-webfont.woff)  format('truetype'); /* Safari, Android, iOS */
+}
+
+@font-face {
+    font-family: 'dsFontsNotoSansRegular';
+    src: url(../fonts/notosans-regular-webfont.woff); /* IE9 Compat Modes */
+    src: url(../fonts/notosans-regular-webfont.woff)  format('truetype'); /* Safari, Android, iOS */
+}
+
+@font-face {
+    font-family: 'dsFontsNotoSansBold';
+    src: url(../fonts/notosans-bold-webfont.woff); /* IE9 Compat Modes */
+    src: url(../fonts/notosans-bold-webfont.woff)  format('truetype'); /* Safari, Android, iOS */
+}
+
+@font-face {
+    font-family: 'dsFontsNotoSansBoldItalic';
+    src: url(../fonts/notosans-bolditalic-webfont.woff); /* IE9 Compat Modes */
+    src: url(../fonts/notosans-bolditalic-webfont.woff)  format('truetype'); /* Safari, Android, iOS */
+}
+
+@font-face {
+    font-family: 'dsFontsNotoSansItalic';
+    src: url(../fonts/notosans-italic-webfont.woff); /* IE9 Compat Modes */
+    src: url(../fonts/notosans-italic-webfont.woff)  format('truetype'); /* Safari, Android, iOS */
+}
