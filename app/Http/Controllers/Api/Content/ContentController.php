@@ -25,7 +25,6 @@ class ContentController extends Controller {
 
     public function get_list(Request $request) {
         $token = $request->header('token');
-        debug($request->page);
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
