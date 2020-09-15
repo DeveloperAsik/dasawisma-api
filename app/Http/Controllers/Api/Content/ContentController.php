@@ -24,9 +24,9 @@ class ContentController extends Controller {
     //put your code here
 
     public function get_list(Request $request) {
-        $token = $request->header('token');
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '= 1', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
             $Tbl_contents = new Tbl_contents();
             $res = $Tbl_contents->find('all', array(
@@ -78,7 +78,7 @@ class ContentController extends Controller {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, token not match', 'data' => null));
+            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, token not matchaa   ', 'data' => null));
         }
     }
 
