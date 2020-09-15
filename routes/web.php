@@ -25,9 +25,19 @@ Route::get('/user-details', 'Api\Settings\UserController@get_user_details')->nam
 Route::get('/user-permissions', 'Api\Settings\UserController@get_user_permissions')->name('get-user-permissions');
 
 //fetching data news/carousel/homepage content
-
 Route::get('/fetch/about', 'Api\Content\AboutController@get_list')->name('get-about');
+
 Route::get('/fetch/content', 'Api\Content\ContentController@get_list')->name('get-list-country');
+Route::post('/find/content', 'Api\Content\ContentController@find')->name('get-country');
+
+//fetching data menu
+Route::get('/fetch/menu', 'Api\Prefferences\MenuController@get_list')->name('get-list-menu');
+Route::get('/fetch/menu/first', 'Api\Prefferences\MenuController@find')->name('get-menu');
+Route::post('/transmit/menu', 'Api\Prefferences\MenuController@insert')->name('transmit-menu');
+Route::post('/update/menu', 'Api\Prefferences\MenuController@update')->name('update-menu');
+
+//fetching data icon
+Route::get('/fetch/icon', 'Api\Master\IconController@get_list')->name('get-list-icon');
 
 
 ////fetching data location
@@ -71,15 +81,7 @@ Route::get('/fetch/content', 'Api\Content\ContentController@get_list')->name('ge
 //Route::post('/fetch/family-properties', 'Api\Master\PropertyController@find')->name('get-property');
 //Route::post('/transmit/family-property', 'Api\Master\PropertyController@insert')->name('transmit-property');
 //
-////fetching data menu
-//Route::post('/fetch/menu', 'Api\Prefferences\MenuController@get_list')->name('get-list-menu');
-//Route::post('/fetch/menu/first', 'Api\Prefferences\MenuController@find')->name('get-menu');
-//Route::post('/transmit/menu', 'Api\Prefferences\MenuController@insert')->name('transmit-menu');
-//Route::post('/update/menu', 'Api\Prefferences\MenuController@update')->name('update-menu');
-//
-////fetching data icon
-//Route::get('/fetch/icon', 'Api\Master\IconController@get_list')->name('get-list-icon');
-//
+
 ////fetching data volunteer
 //Route::get('/fetch/volunteer/', 'Api\Locations\VolunteerController@get_list')->name('get-list-volunteer');
 //

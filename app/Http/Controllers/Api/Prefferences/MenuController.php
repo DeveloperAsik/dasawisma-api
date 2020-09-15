@@ -9,7 +9,7 @@
 namespace App\Http\Controllers\Api\Prefferences;
 
 use App\Http\Controllers\Controller;
-use Request;
+use Illuminate\Http\Request;
 use App\Model\Tbl_user_tokens;
 use App\Model\Tbl_menus;
 use App\Http\Libraries\Tools;
@@ -26,13 +26,13 @@ class MenuController extends Controller {
     }
 
     //put your code here
-    public function get_list() {
-        $token = Request::header('token');
+    public function get_list(Request $request) {
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            return Controller::initMenu($post);
+            $get = $request->input();
+            return Controller::initMenu($get, 'json');
         } else {
             return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
@@ -59,15 +59,14 @@ class MenuController extends Controller {
         return $str;
     }
 
-    
-    public function find() {
-        $token = Request::header('token');
+    public function find(Request $request) {
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            if (isset($post) && !empty($post)) {
-                $id = base64_decode($post['id']);
+            $get = $request->input();
+            if (isset($get) && !empty($get)) {
+                $id = base64_decode($get['id']);
                 $Tbl_menus = new Tbl_menus();
                 $child = $Tbl_menus->find('first', array('fields' => 'all', 'table_name' => 'tbl_menus', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $id . '"'))));
                 if (isset($child) && !empty($child) && $child != null) {
@@ -85,51 +84,51 @@ class MenuController extends Controller {
         }
     }
 
-    public function insert() {
-        $token = Request::header('token');
+    public function insert(Request $request) {
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            if (isset($post) && !empty($post)) {
+            $get = $request->input();
+            if (isset($get) && !empty($get)) {
                 $level = 0;
-                if ($post['parent_level'] != null) {
-                    $level = ((int)$post['parent_level']+1);
+                if ($get['parent_level'] != null) {
+                    $level = ((int) $get['parent_level'] + 1);
                 }
                 $status = '0';
-                if ($post['status'] == '1') {
+                if ($get['status'] == '1') {
                     $status = '1';
                 }
                 $logged = '0';
-                if ($post['logged'] == '1') {
+                if ($get['logged'] == '1') {
                     $logged = '1';
                 }
                 $cms = '0';
-                if ($post['cms'] == '1') {
+                if ($get['cms'] == '1') {
                     $cms = '1';
                 }
                 $open = '0';
-                if ($post['open'] == '1') {
+                if ($get['open'] == '1') {
                     $open = '1';
                 }
                 $badge = '0';
-                if ($post['badge'] == '1') {
+                if ($get['badge'] == '1') {
                     $badge = '1';
                 }
                 $insert_data = [
-                    'name' => $post['name'],
-                    'path' => $post['path'],
-                    'rank' => $post['rank'],
+                    'name' => $get['name'],
+                    'path' => $get['path'],
+                    'rank' => $get['rank'],
                     'level' => $level,
-                    'icon' => $post['icon'],
-                    'description' => $post['description'],
+                    'icon' => $get['icon'],
+                    'description' => $get['description'],
                     'is_active' => $status,
                     'is_cms' => $cms,
                     'is_open' => $open,
                     'is_badge' => $badge,
                     'is_logged_in' => $logged,
-                    'module_id' => $post['module_id'],
-                    'parent_id' => $post['parent_id'],
+                    'module_id' => $get['module_id'],
+                    'parent_id' => $get['parent_id'],
                     "created_by" => $user_token->user_id,
                     "created_date" => Tools::getDateNow()
                 ];
@@ -146,26 +145,26 @@ class MenuController extends Controller {
         }
     }
 
-    public function update() {
-        $token = Request::header('token');
+    public function update(Request $request) {
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            if (isset($post) && !empty($post)) {
+            $get = $request->input();
+            if (isset($get) && !empty($get)) {
                 $update_data = [
-                    'name' => $post['name'],
-                    'path' => $post['path'],
-                    'icon' => $post['icon'],
-                    'description' => $post['description'],
-                    'is_active' => $post['status'],
-                    'is_logged_in' => $post['logged'],
-                    'is_cms' => $post['cms'],
-                    'is_open' => $post['open'],
-                    'is_badge' => $post['badge'],
+                    'name' => $get['name'],
+                    'path' => $get['path'],
+                    'icon' => $get['icon'],
+                    'description' => $get['description'],
+                    'is_active' => $get['status'],
+                    'is_logged_in' => $get['logged'],
+                    'is_cms' => $get['cms'],
+                    'is_open' => $get['open'],
+                    'is_badge' => $get['badge'],
                 ];
                 $Tbl_menus = new Tbl_menus();
-                $res = $Tbl_menus->update($update_data, $post['id']);
+                $res = $Tbl_menus->update($update_data, $get['id']);
                 if (isset($res) && !empty($res) && $res != null) {
                     return json_encode(array('status' => 200, 'message' => 'Successfully update data.', 'data' => ['id' => $res]));
                 } else {

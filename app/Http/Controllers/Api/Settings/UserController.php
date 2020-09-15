@@ -1,7 +1,7 @@
 <?php
 
 /*
- * To change this license header, choose License Headers in Project Properties.
+ * To change this license input, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
@@ -32,8 +32,8 @@ class UserController extends Controller {
     }
 
     public function generate_token_access(Request $request) {
-        $device_id = $request->header('deviceid');
-        //for getting header content
+        $device_id = $request->input('deviceid');
+        //for getting input content
         if (isset($device_id) && !empty($device_id)) {
             $validate = (Auth::generate_token_access($device_id));
             if ($validate) {
@@ -48,12 +48,12 @@ class UserController extends Controller {
 
     public function generate_token_user(Request $request) {
         $get = $request->input();
-        if ($request->header('deviceid')) {
+        if ($request->input('deviceid')) {
             if (isset($get) && !empty($get)) {
                 $data = array(
                     'userid' => $get['username'],
                     'password' => base64_decode($get['password']),
-                    'deviceid' => $request->header('deviceid')
+                    'deviceid' => $request->input('deviceid')
                 );
                 //validate userid and password
                 if (Tools_Library::getValidEmail($data['userid'])) {
@@ -82,7 +82,7 @@ class UserController extends Controller {
     }
 
     public function drop_user_session(Request $request) {
-        $token = $request->header('token');
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
@@ -94,18 +94,18 @@ class UserController extends Controller {
     }
 
     public function is_logged_in(Request $request) {
-        $token = $request->header('token');
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
-            return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => null));
+            return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => array('logged_in' => true)));
         } else {
-            return json_encode(array('status' => 201, 'message' => 'youre not in logged in session', 'data' => null));
+            return json_encode(array('status' => 200, 'message' => 'youre not in logged in session', 'data' => array('logged_in' => false)));
         }
     }
 
     public function get_user_details(Request $request) {
-        $token = $request->header('token');
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
@@ -130,7 +130,7 @@ class UserController extends Controller {
     }
 
     public function get_user_permissions(Request $request) {
-        $token = $request->header('token');
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
@@ -143,7 +143,7 @@ class UserController extends Controller {
     }
 
     public function verify_password(Request $request) {
-        $token = $request->header('token');
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {

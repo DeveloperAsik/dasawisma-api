@@ -8,17 +8,13 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 //load laravel feature
 use View;
-use Request;
 //load custom libraries class
 use App\Http\Libraries\Variables_Library AS VLibrary;
 use App\Http\Libraries\Session_Library AS SesLibrary;
 use App\Http\Libraries\Auth AS AuthLibrary;
 
-use App\Model\Tbl_users;
-use App\Model\Tbl_user_tokens;
 use App\Model\Tbl_menus;
 use App\Model\Tbl_modules;
-use App\Model\Tbl_icons;
 class Controller extends BaseController {
 
     use AuthorizesRequests,
@@ -78,7 +74,7 @@ class Controller extends BaseController {
     }
 
     public function initMenu($post = array(), $return = 'json') {
-        if (isset($post) && !empty($post)) {
+        if (isset($post['module_id']) && !empty($post['module_id'])) {
             $id = $post['module_id'];
             $logged = $post['logged'];
             $name = $post['module_name'];

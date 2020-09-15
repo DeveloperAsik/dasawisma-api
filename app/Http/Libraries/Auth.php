@@ -171,21 +171,23 @@ class Auth {
                 } else {
                     /** @var type $Key */
                     debug($user_device_exist);
-                    foreach ($user_device_exist AS $Key => $values) {
-                        DB::table('tbl_user_devices')->delete()->where('user_id', '=', $values->user_id)->delete();
+                    if (isset($user_device_exist) && !empty($user_device_exist)) {
+                        foreach ($user_device_exist AS $Key => $values) {
+                            DB::table('tbl_user_devices')->delete()->where('user_id', '=', $values->user_id)->delete();
+                        }
+                        $user_device = DB::table('tbl_user_devices')->insertGetId(
+                                [
+                                    'fraud_scan' => '-',
+                                    'uuid' => SesLibrary::_get('_uuid'),
+                                    'user_id' => $data->id,
+                                    'is_mobile' => Tools_Library::getStatusMobile(),
+                                    'is_tablet' => Tools_Library::getStatusTablet(),
+                                    'is_active' => 1,
+                                    'created_by' => $data->id,
+                                    'created_date' => Tools_Library::getDateNow()
+                                ]
+                        );
                     }
-                    $user_device = DB::table('tbl_user_devices')->insertGetId(
-                            [
-                                'fraud_scan' => '-',
-                                'uuid' => SesLibrary::_get('_uuid'),
-                                'user_id' => $data->id,
-                                'is_mobile' => Tools_Library::getStatusMobile(),
-                                'is_tablet' => Tools_Library::getStatusTablet(),
-                                'is_active' => 1,
-                                'created_by' => $data->id,
-                                'created_date' => Tools_Library::getDateNow()
-                            ]
-                    );
                 }
                 DB::table('tbl_user_tokens')->delete();
                 DB::table('tbl_user_tokens')->where('user_id', '=', $user_device_exist[0]->user_id)->delete();
@@ -333,27 +335,27 @@ class Auth {
 
     public static function generate_token_access($device_id) {
         $user_device = DB::table('tbl_user_devices')->insertGetId(
-            [
-                'fraud_scan' => '-',
-                'uuid' => $device_id,
-                'user_id' => 1,
-                'is_mobile' => Tools_Library::getStatusMobile(),
-                'is_tablet' => Tools_Library::getStatusTablet(),
-                'is_active' => 1,
-                'created_by' => 1,
-                'created_date' => Tools_Library::getDateNow()
-            ]
+                [
+                    'fraud_scan' => '-',
+                    'uuid' => $device_id,
+                    'user_id' => 1,
+                    'is_mobile' => Tools_Library::getStatusMobile(),
+                    'is_tablet' => Tools_Library::getStatusTablet(),
+                    'is_active' => 1,
+                    'created_by' => 1,
+                    'created_date' => Tools_Library::getDateNow()
+                ]
         );
         $access_token = DB::table('tbl_user_tokens')->insertGetId(
-            [
-                'token_generated' => Tools_Library::getRandomChar(128),
-                'user_id' => 0,
-                'is_guest' => 1,
-                'device_id' => $user_device,
-                'is_active' => 1,
-                'created_by' => 1,
-                'created_date' => Tools_Library::getDateNow()
-            ]
+                [
+                    'token_generated' => Tools_Library::getRandomChar(128),
+                    'user_id' => 0,
+                    'is_guest' => 1,
+                    'device_id' => $user_device,
+                    'is_active' => 1,
+                    'created_by' => 1,
+                    'created_date' => Tools_Library::getDateNow()
+                ]
         );
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_tokens_exist = $Tbl_user_tokens->find('first', array(
