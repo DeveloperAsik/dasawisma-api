@@ -38,8 +38,8 @@ class ContentController extends Controller {
                     )
                 ),
                 'limit' => array(
-                    'offset' => $request->page,
-                    'perpage' => $request->total
+                    'offset' => $request->input('page'),
+                    'perpage' => $request->input('total')
                 )
                     )
             );
@@ -78,13 +78,12 @@ class ContentController extends Controller {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, token not matchaa   ', 'data' => null));
+            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, token not matchaa   ', 'data' => $token));
         }
     }
 
     public function find(Request $request) {
-        debug('wew');
-        $token = $request->header('token');
+        $token = $request->input('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
@@ -95,7 +94,7 @@ class ContentController extends Controller {
                 'conditions' => array(
                     'where' => array(
                         'a.is_active' => '="1"',
-                        'a.id' => '="' . $request->id . '"'
+                        'a.id' => '="' . $request->input('id') . '"'
                     )
                 )
                     )

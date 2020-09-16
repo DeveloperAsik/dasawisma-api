@@ -28,7 +28,7 @@ Route::get('/user-permissions', 'Api\Settings\UserController@get_user_permission
 Route::get('/fetch/about', 'Api\Content\AboutController@get_list')->name('get-about');
 
 Route::get('/fetch/content', 'Api\Content\ContentController@get_list')->name('get-list-country');
-Route::post('/find/content', 'Api\Content\ContentController@find')->name('get-country');
+Route::get('/find/content', 'Api\Content\ContentController@find')->name('get-country');
 
 //fetching data menu
 Route::get('/fetch/menu', 'Api\Prefferences\MenuController@get_list')->name('get-list-menu');
