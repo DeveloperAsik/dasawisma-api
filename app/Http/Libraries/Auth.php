@@ -172,7 +172,9 @@ class Auth {
                     /** @var type $Key */
                     if (isset($user_device_exist) && !empty($user_device_exist)) {
                         foreach ($user_device_exist AS $Key => $values) {
-                            DB::table('tbl_user_devices')->delete()->where('user_id', '=', $values->user_id)->delete();
+                            if ($values->user_id) {
+                                DB::table('tbl_user_devices')->delete()->where('user_id', '=', $values->user_id)->delete();
+                            }
                         }
                         $user_device = DB::table('tbl_user_devices')->insertGetId(
                                 [
