@@ -16,6 +16,7 @@ Route::get('/', 'Api\Settings\UserController@index')->name('/');
 
 Route::get('/generate-token-access', 'Api\Settings\UserController@generate_token_access')->name('generate-token-access');
 Route::get('/generate-token-user', 'Api\Settings\UserController@generate_token_user')->name('generate-token-user');
+Route::get('/validate-token', 'Api\Settings\UserController@validate_token')->name('validate-token');
 Route::get('/verify-password', 'Api\Settings\UserController@verify_password')->name('verify-password');
 
 //user related
