@@ -170,7 +170,6 @@ class Auth {
                     );
                 } else {
                     /** @var type $Key */
-                    debug($user_device_exist);
                     if (isset($user_device_exist) && !empty($user_device_exist)) {
                         foreach ($user_device_exist AS $Key => $values) {
                             DB::table('tbl_user_devices')->delete()->where('user_id', '=', $values->user_id)->delete();
