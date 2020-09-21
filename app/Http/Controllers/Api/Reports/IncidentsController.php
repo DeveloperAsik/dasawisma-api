@@ -257,17 +257,18 @@ class IncidentsController extends Controller {
         }
     }
 
-    public function get_latest_list(Request $request) {
+    public function get_log_list(Request $request) {
         $token = $request->input('token');
         $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first(); //$Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
             $offset = $request->input('page') - 1;
             //debug($user_token->user_id);
-            $result = DB::table('tbl_c_report_incidents')->select('tbl_c_report_incidents.id AS report_incident_id', 'tbl_c_report_incidents.title', 'tbl_c_report_incidents.created_date', 'tbl_users.id', 'tbl_users.username')->where('tbl_c_report_incidents.is_active', 1)->where('tbl_c_report_incidents.created_by', $user_token->user_id)->join('tbl_users', 'tbl_users.id', '=', 'tbl_c_report_incidents.created_by')->limit($request->input('total'))->offset($offset)->get();
+            $result = DB::table('tbl_c_report_incidents')->select('tbl_c_report_incidents.id AS report_incident_id', 'tbl_c_report_incidents.title', 'tbl_c_report_incidents.created_date', 'tbl_users.id AS user_id', 'tbl_users.username')->where('tbl_c_report_incidents.is_active', 1)->where('tbl_c_report_incidents.created_by', $user_token->user_id)->join('tbl_users', 'tbl_users.id', '=', 'tbl_c_report_incidents.created_by')->limit($request->input('total'))->offset($offset)->get();
             $response = array();
             if (isset($result) && !empty($result)) {
                 foreach ($result AS $key => $val) {
-                    $response[] = $val->username . ' create report by id ' . $val->report_incident_id . ' at ' . $val->created_date . ' with title ' . $val->title;
+                    $response[] = 'user '.$val->username .'['. $val->uer_id .'] | create report ' . $val->title .'[' . $val->report_incident_id .'] | ' . date('d M Y', strtotime($val->created_date));
+                    
                 }
             }
             if ($response) {
