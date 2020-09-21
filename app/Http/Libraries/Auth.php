@@ -44,17 +44,16 @@ class Auth {
         if ($data != null) {
             $Tbl_users = new Tbl_users();
             if (isset($data['email']) && !empty($data['email'])) {
-                $user_exist = DB::table('tbl_users')->where('is_active', 1)->where('email', $data['email'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.email' => '="' . $data['email'] . '"'))));
+                $user_exist = DB::table('tbl_users')->where('email', $data['email'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.email' => '="' . $data['email'] . '"'))));
             } else {
-                $user_exist = DB::table('tbl_users')->where('is_active', 1)->orWhere('username', $data['userid'])->orWhere('code', $data['userid'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.username' => '="' . $data['userid'] . '"'), 'or' => array('a.code' => '="'.$data['userid']. '"'))));
+                $user_exist = DB::table('tbl_users')->orWhere('username', $data['userid'])->orWhere('code', $data['userid'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.username' => '="' . $data['userid'] . '"'), 'or' => array('a.code' => '="'.$data['userid']. '"'))));
             }
-            //debug($user_exist);
             $res = Auth::verify_hash($data['password'], $user_exist->password);
             if ($res == true) {
                 $token = Auth::generate_api_token($user_exist);
                 if ($token['status'] == 200) {
                     $Tbl_user_tokens = new Tbl_user_tokens();
-                    $generated_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token['data']->token_generated)->first();//$Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.token_generated' => '="' . $token['data']->token_generated . '"'))));
+                    $generated_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token['data']->token_generated)->first(); //$Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.token_generated' => '="' . $token['data']->token_generated . '"'))));
                     $return = json_encode(array('status' => 200, 'message' => 'success generate token', 'data' => array('token' => $generated_token->token_generated)));
                 } else {
                     $return = json_encode(array('status' => 202, 'message' => 'generate token failed'));
