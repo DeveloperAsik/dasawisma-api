@@ -42,6 +42,7 @@ class Auth {
     public static function validate_password($data = null) {
         $return = json_encode(array('status' => 204, 'message' => 'empty data!!!'));
         if ($data != null) {
+            debug($data);
             $Tbl_users = new Tbl_users();
             if (isset($data['email']) && !empty($data['email'])) {
                 $user_exist = DB::table('tbl_users')->where('is_active', 1)->where('email', $data['email'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.email' => '="' . $data['email'] . '"'))));
