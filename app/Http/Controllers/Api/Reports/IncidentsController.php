@@ -267,7 +267,7 @@ class IncidentsController extends Controller {
             $response = array();
             if (isset($result) && !empty($result)) {
                 foreach ($result AS $key => $val) {
-                    $response[] = 'user '.$val->username .'['. $val->user_id .'] | create report ' . $val->title .'[' . $val->report_incident_id .'] | ' . date('d M Y', strtotime($val->created_date));
+                    $response[] = 'user '.$val->username .'[user-id:'. $val->user_id .'] | create report : ' . $val->title .'[report-id' . $val->report_incident_id .'] | ' . date('d M Y', strtotime($val->created_date));
                     
                 }
             }
