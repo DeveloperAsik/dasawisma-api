@@ -43,12 +43,13 @@ class Auth {
         $return = json_encode(array('status' => 204, 'message' => 'empty data!!!'));
         if ($data != null) {
             $Tbl_users = new Tbl_users();
+            debug($data);
             if (isset($data['email']) && !empty($data['email'])) {
                 $user_exist = DB::table('tbl_users')->where('is_active', 1)->where('email', $data['email'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.email' => '="' . $data['email'] . '"'))));
             } else {
                 $user_exist = DB::table('tbl_users')->where('is_active', 1)->orWhere('username', $data['userid'])->orWhere('code', $data['userid'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.username' => '="' . $data['userid'] . '"'), 'or' => array('a.code' => '="'.$data['userid']. '"'))));
             }
-            debug($user_exist);
+            //debug($user_exist);
             $res = Auth::verify_hash($data['password'], $user_exist->password);
             if ($res == true) {
                 $token = Auth::generate_api_token($user_exist);
