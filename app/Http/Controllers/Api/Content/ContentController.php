@@ -9,6 +9,7 @@
 namespace App\Http\Controllers\Api\Content;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use App\Model\Tbl_user_tokens;
 use App\Model\Tbl_contents;
