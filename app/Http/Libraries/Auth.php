@@ -48,6 +48,7 @@ class Auth {
             } else {
                 $user_exist = DB::table('tbl_users')->where('is_active', 1)->where('username', $data['userid'])->orWhere('code', $data['userid'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.username' => '="' . $data['userid'] . '"'), 'or' => array('a.code' => '="'.$data['userid']. '"'))));
             }
+            debug($user_exist);
             $res = Auth::verify_hash($data['password'], $user_exist->password);
             if ($res == true) {
                 $token = Auth::generate_api_token($user_exist);
