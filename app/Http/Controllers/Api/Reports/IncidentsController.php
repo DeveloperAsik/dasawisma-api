@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
 use App\Http\Libraries\Tools_Library AS Tools;
 //import model
 use Illuminate\Support\Facades\DB;
-use App\Model\Tbl_user_tokens;
 use App\Model\Tbl_c_report_incidents;
 use App\Model\Tbl_d_integrated_service_posts;
 use App\Model\Tbl_c_report_types;

@@ -51,28 +51,25 @@ Route::get('/latest/activity', 'Api\Settings\UserController@get_latest_activity'
 Route::get('/fetch/citizen/{key}', 'Api\Master\CitizenController@get_list')->name('get-list-citizen');
 Route::get('/fetch/family/', 'Api\Master\FamilyController@get_list')->name('get-list-family');
 Route::get('/fetch/children', 'Api\Reports\IncidentsController@get_list')->name('get-list-reports');
+
+
 ////fetching data location
-//Route::get('/fetch/countries', 'Api\Locations\CountryController@get_list')->name('get-list-country');
+Route::get('/fetch/countries', 'Api\Locations\CountryController@get_list')->name('get-list-country');
 //Route::post('/fetch/countries', 'Api\Locations\CountryController@find')->name('get-country');
 //
-//Route::get('/fetch/provinces', 'Api\Locations\ProvinceController@get_list')->name('get-list-province');
+Route::get('/fetch/provinces', 'Api\Locations\ProvinceController@get_list')->name('get-list-province');
 //Route::post('/fetch/provinces', 'Api\Locations\ProvinceController@find')->name('get-province');
 //
-//Route::get('/fetch/districts', 'Api\Locations\DistrictController@get_list')->name('get-list-district');
+Route::get('/fetch/districts', 'Api\Locations\DistrictController@get_list')->name('get-list-district');
 //Route::post('/fetch/districts', 'Api\Locations\DistrictController@find')->name('get-district');
 //
-//Route::get('/fetch/sub-districts', 'Api\Locations\SubDistrictController@get_list')->name('get-list-sub-district');
+Route::get('/fetch/sub-districts', 'Api\Locations\SubDistrictController@get_list')->name('get-list-sub-district');
 //Route::post('/fetch/sub-districts', 'Api\Locations\SubDistrictController@find')->name('get-sub-district');
 //
-//Route::get('/fetch/areas', 'Api\Locations\AreaController@get_list')->name('get-list-area');
+Route::get('/fetch/areas', 'Api\Locations\AreaController@get_list')->name('get-list-area');
 //Route::post('/fetch/areas', 'Api\Locations\AreaController@find')->name('get-area');
 //
-////fetching report
-//Route::get('/fetch/report-incidents', 'Api\Reports\IncidentsController@get_list')->name('get-list-reports');
-//Route::post('/fetch/report-incidents', 'Api\Reports\IncidentsController@find')->name('get-reports');
-//Route::post('/transmit/report-incident', 'Api\Reports\IncidentsController@insert')->name('transmit-report');
-//
-//Route::get('/fetch/report-types', 'Api\Reports\TypesController@get_list')->name('get-list-report-types');
+Route::get('/fetch/report-types', 'Api\Reports\TypesController@get_list')->name('get-list-report-types');
 //Route::post('/fetch/report-types', 'Api\Reports\TypesController@find')->name('get-report-types');
 //
 ////fetching data master

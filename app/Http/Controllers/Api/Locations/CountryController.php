@@ -9,9 +9,9 @@
 namespace App\Http\Controllers\Api\Locations;
 
 use App\Http\Controllers\Controller;
-use App\Model\Tbl_user_tokens;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use App\Model\Tbl_a_countries;
-use Request;
 
 /**
  * Description of CountryController
@@ -23,13 +23,27 @@ class CountryController extends Controller {
     //put your code here
 
 
-    public function get_list() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+    public function get_list(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $Tbl_a_countries = new Tbl_a_countries();
-            $res = $Tbl_a_countries->find('all', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"'))));
+            $offset = $request->input('page') - 1;
+            $where = array('a.is_active' => '="1"');
+            $conditions = array();
+            if ($request->input('keyword')) {
+                $conditions = array_merge($where, array('a.name' => 'like "%' . $request->input('keyword') . '%"'));
+            }
+            $res = $Tbl_a_countries->find('all', array(
+                'fields' => 'all',
+                'table_name' => 'tbl_a_countries',
+                'conditions' => array('where' => $conditions),
+                'limit' => array(
+                    'offset' => $offset,
+                    'perpage' => $request->input('total')
+                )
+                    )
+            );
             if (isset($res) && !empty($res) && $res != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
             } else {
@@ -40,25 +54,5 @@ class CountryController extends Controller {
         }
     }
 
-    public function find() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            if (isset($post) && !empty($post)) {
-                $id = base64_decode($post['id']);
-                $Tbl_a_countries = new Tbl_a_countries();
-                $res = $Tbl_a_countries->find('all', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $id . '"'))));
-                if (isset($res) && !empty($res) && $res != null) {
-                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
-                } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, or data not found', 'data' => null));
-                }
-            }
-        } else {
-            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
-        }
-    }
 
 }
