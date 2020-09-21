@@ -37,21 +37,18 @@ class IncidentsController extends Controller {
         $token = $request->input('token');
         $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
-            $Tbl_c_report_incidents = new Tbl_c_report_incidents();
-            $report_incidents = $Tbl_c_report_incidents->find('all', array(
-                'fields' => 'all',
-                'table_name' => 'tbl_c_report_incidents',
-                'conditions' => array(
-                    'where' => array(
-                        'a.is_active' => '=1'
-                    )
-                ),
-                'limit' => array(
-                    'offset' => $request->input('page'),
-                    'perpage' => $request->input('total')
-                )
-                    )
-            );
+            $offset = $request->input('page') - 1;
+            $report_incidents = DB::table('tbl_c_report_incidents AS a')->select('a.*', 'b.name AS ispName', 'c.name AS report_type_name', 'd.title AS ril_title', 'e.name AS country_name', 'f.name AS provinces_name', 'g.name AS district_name', 'h.name AS sub_district_name', 'i.name AS area_name')
+                            ->where('a.is_active', 1)
+                            ->leftJoin('tbl_d_integrated_service_posts AS b', 'b.id', '=', 'a.integrated_services_post_id')
+                            ->leftJoin('tbl_c_report_types AS c', 'c.id', '=', 'a.type_id')
+                            ->leftJoin('tbl_c_report_incident_levels AS d', 'd.id', '=', 'a.level_id')
+                            ->leftJoin('tbl_a_countries AS e', 'e.id', '=', 'a.country_id')
+                            ->leftJoin('tbl_a_provinces AS f', 'f.id', '=', 'a.province_id')
+                            ->leftJoin('tbl_a_districts AS g', 'g.id', '=', 'a.district_id')
+                            ->leftJoin('tbl_a_sub_districts AS h', 'h.id', '=', 'a.sub_district_id')
+                            ->leftJoin('tbl_a_areas AS i', 'i.id', '=', 'a.area_id')
+                            ->limit($request->input('total'))->offset($offset)->get();
             if (isset($report_incidents) && !empty($report_incidents) && $report_incidents != null) {
                 $res = array();
                 foreach ($report_incidents AS $key => $value) {
@@ -127,115 +124,63 @@ class IncidentsController extends Controller {
         if (isset($user_token) && !empty($user_token)) {
             $get = $request->input();
             if (isset($get) && !empty($get)) {
-                $conditions = array(
-                    'where' => array(
-                        'a.is_active' => '=1'
-                    )
-                );
+                $offset = $request->input('page') - 1;
                 $keyword = $request->input('keyword');
-                $conditions_or = array();
-                if (isset($keyword) && !empty($keyword)) {
-                    $conditions_or = array(
-                        'or' => array(
-                            'a.id' => $keyword,
-                            'a.title' => '="' . $keyword . '"',
-                            'b.name' => '="' . $keyword . '"',
-                            'c.name' => '="' . $keyword . '"',
-                            'd.name' => '="' . $keyword . '"',
-                            'e.name' => '="' . $keyword . '"',
-                            'f.name' => '="' . $keyword . '"',
-                            'g.name' => '="' . $keyword . '"',
-                            'h.name' => '="' . $keyword . '"',
-                            'i.name' => '="' . $keyword . '"',
-                        )
-                    );
-                }
-                $where = array_merge($conditions, $conditions_or);
-                $Tbl_c_report_incidents = new Tbl_c_report_incidents();
-                $report_incidents = $Tbl_c_report_incidents->find('all', array(
-                    'fields' => 'a.id IncidentID, a.title IncindentTitle, a.description IncidentDesc, a.additional_info IncidentInfo, a.created_date IncidentCreateDate, b.id ServicePostID, b.code ServicePostCode, b.name ServicePostName, b.liable_by ServicePostLiableBy, b.address ServicePostAddress, c.id ReportTypeID, c.name ReportTypeName, d.id ReportLevelID, d.name ReportLevelName, e.id CountryID, e.name CountryName, f.id ProvinceID, f.name ProvinceName, g.id DistrictID, g.name DistrictName, h.id SubDistricyID, h.name SubDistrictName, i.id AreaID, i.name AreaName',
-                    'table_name' => 'tbl_c_report_incidents',
-                    'conditions' => $where,
-                    'joins' => array(
-                        array(
-                            'table_name' => 'tbl_d_integrated_service_posts b',
-                            'conditions' => 'b.id = a.integrated_services_post_id',
-                            'type' => 'left'
-                        ),
-                        array(
-                            'table_name' => 'tbl_c_report_types c',
-                            'conditions' => 'c.id = a.type_id',
-                            'type' => 'left'
-                        ),
-                        array(
-                            'table_name' => 'tbl_c_report_incident_levels d',
-                            'conditions' => 'd.id = a.level_id',
-                            'type' => 'left'
-                        ),
-                        array(
-                            'table_name' => 'tbl_a_countries e',
-                            'conditions' => 'e.id = a.country_id',
-                            'type' => 'left'
-                        ),
-                        array(
-                            'table_name' => 'tbl_a_provinces f',
-                            'conditions' => 'f.id = a.province_id',
-                            'type' => 'left'
-                        ),
-                        array(
-                            'table_name' => 'tbl_a_districts g',
-                            'conditions' => 'g.id = a.district_id',
-                            'type' => 'left'
-                        ),
-                        array(
-                            'table_name' => 'tbl_a_sub_districts h',
-                            'conditions' => 'h.id = a.sub_district_id',
-                            'type' => 'left'
-                        ),
-                        array(
-                            'table_name' => 'tbl_a_areas i',
-                            'conditions' => 'i.id = a.area_id',
-                            'type' => 'left'
-                        )
-                    ),
-                    'limit' => array(
-                        'offset' => $request->input('page'),
-                        'perpage' => $request->input('total')
-                    )
-                        )
-                );
+                $report_incidents = DB::table('tbl_c_report_incidents AS a')->select('a.*', 'b.name AS ispName', 'c.name AS report_type_name', 'd.title AS ril_title', 'e.name AS country_name', 'f.name AS provinces_name', 'g.name AS district_name', 'h.name AS sub_district_name', 'i.name AS area_name')
+                                ->where('a.is_active', 1)
+                                ->orWhere('a.id', $keyword)
+                                ->orWhere('a.title', 'like', $keyword . '%')
+                                ->orWhere('b.name', 'like', $keyword . '%')
+                                ->orWhere('c.name', 'like', $keyword . '%')
+                                ->orWhere('d.title', 'like', $keyword . '%')
+                                ->orWhere('e.name', 'like', $keyword . '%')
+                                ->orWhere('f.name', 'like', $keyword . '%')
+                                ->orWhere('g.name', 'like', $keyword . '%')
+                                ->orWhere('h.name', 'like', $keyword . '%')
+                                ->orWhere('i.name', 'like', $keyword . '%')
+                                ->leftJoin('tbl_d_integrated_service_posts AS b', 'b.id', '=', 'a.integrated_services_post_id')
+                                ->leftJoin('tbl_c_report_types AS c', 'c.id', '=', 'a.type_id')
+                                ->leftJoin('tbl_c_report_incident_levels AS d', 'd.id', '=', 'a.level_id')
+                                ->leftJoin('tbl_a_countries AS e', 'e.id', '=', 'a.country_id')
+                                ->leftJoin('tbl_a_provinces AS f', 'f.id', '=', 'a.province_id')
+                                ->leftJoin('tbl_a_districts AS g', 'g.id', '=', 'a.district_id')
+                                ->leftJoin('tbl_a_sub_districts AS h', 'h.id', '=', 'a.sub_district_id')
+                                ->leftJoin('tbl_a_areas AS i', 'i.id', '=', 'a.area_id')
+                                ->limit($request->input('total'))->offset($offset)->get();
                 if (isset($report_incidents) && !empty($report_incidents) && $report_incidents != null) {
                     $res = array();
                     foreach ($report_incidents AS $key => $value) {
-//                        //get isp
-//                        $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
-//                        $isp = $Tbl_d_integrated_service_posts->find('first', array('fields' => 'all', 'table_name' => 'tbl_d_integrated_service_posts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->integrated_services_post_id . '"'))));
-//
-//                        //get type
-//                        $Tbl_c_report_types = new Tbl_c_report_types();
-//                        $report_type = $Tbl_c_report_types->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_types', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->type_id . '"'))));
+                        //get isp
+                        $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
+                        $isp = $Tbl_d_integrated_service_posts->find('first', array('fields' => 'all', 'table_name' => 'tbl_d_integrated_service_posts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->integrated_services_post_id . '"'))));
+
+                        //get type
+                        $Tbl_c_report_types = new Tbl_c_report_types();
+                        $report_type = $Tbl_c_report_types->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_types', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->type_id . '"'))));
+
                         //get level
-//                        $Tbl_c_report_incident_levels = new Tbl_c_report_incident_levels();
-//                        $report_incident_level = $Tbl_c_report_incident_levels->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_incident_levels', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->level_id . '"'))));
-//
-//                        //get country
-//                        $Tbl_a_countries = new Tbl_a_countries();
-//                        $country = $Tbl_a_countries->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->country_id . '"'))));
+                        $Tbl_c_report_incident_levels = new Tbl_c_report_incident_levels();
+                        $report_incident_level = $Tbl_c_report_incident_levels->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_incident_levels', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->level_id . '"'))));
+
+                        //get country
+                        $Tbl_a_countries = new Tbl_a_countries();
+                        $country = $Tbl_a_countries->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->country_id . '"'))));
+
                         //get province
-//                        $Tbl_a_provinces = new Tbl_a_provinces();
-//                        $province = $Tbl_a_provinces->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_provinces', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->province_id . '"'))));
-//
-//                        //get district
-//                        $Tbl_a_districts = new Tbl_a_districts();
-//                        $district = $Tbl_a_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->district_id . '"'))));
-//
-//                        //get sub - district
-//                        $Tbl_a_sub_districts = new Tbl_a_sub_districts();
-//                        $sub_district = $Tbl_a_sub_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_sub_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->sub_district_id . '"'))));
-//
-//                        //get area
-//                        $Tbl_a_areas = new Tbl_a_areas();
-//                        $area = $Tbl_a_areas->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->area_id . '"'))));
+                        $Tbl_a_provinces = new Tbl_a_provinces();
+                        $province = $Tbl_a_provinces->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_provinces', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->province_id . '"'))));
+
+                        //get district
+                        $Tbl_a_districts = new Tbl_a_districts();
+                        $district = $Tbl_a_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->district_id . '"'))));
+
+                        //get sub - district
+                        $Tbl_a_sub_districts = new Tbl_a_sub_districts();
+                        $sub_district = $Tbl_a_sub_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_sub_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->sub_district_id . '"'))));
+
+                        //get area
+                        $Tbl_a_areas = new Tbl_a_areas();
+                        $area = $Tbl_a_areas->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->area_id . '"'))));
                         $res[] = array(
                             'id' => $value->id,
                             'title' => $value->title,
