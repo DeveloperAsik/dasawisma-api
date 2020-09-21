@@ -43,7 +43,7 @@ Route::get('/fetch/icon', 'Api\Master\IconController@get_list')->name('get-list-
 //fetching report
 Route::get('/fetch/report-incidents', 'Api\Reports\IncidentsController@get_list')->name('get-list-reports-incidents');
 Route::get('/find/report-incidents', 'Api\Reports\IncidentsController@find')->name('find-reports-incidents');
-Route::post('/transmit/report-incident', 'Api\Reports\IncidentsController@insert')->name('transmit-report-incidents');
+Route::post('/transmit/report-incidents', 'Api\Reports\IncidentsController@insert')->name('transmit-report-incidents');
 Route::get('/latest/report-incidents', 'Api\Reports\IncidentsController@get_latest_list')->name('get-latest-reports-incidents');
 
 Route::get('/latest/activity', 'Api\Settings\UserController@get_latest_activity')->name('get-latest-activity');

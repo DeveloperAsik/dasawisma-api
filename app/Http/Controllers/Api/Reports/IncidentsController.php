@@ -10,7 +10,7 @@ namespace App\Http\Controllers\Api\Reports;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Libraries\Tools;
+use App\Http\Libraries\Tools_Library AS Tools;
 //import model
 use Illuminate\Support\Facades\DB;
 use App\Model\Tbl_user_tokens;
@@ -224,11 +224,10 @@ class IncidentsController extends Controller {
     }
 
     public function insert(Request $request) {
-        $token = $request->input('token');
+        $token = $request->header('token');
         $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            debug($post);
+            $post = $request->all();
             if (isset($post) && !empty($post)) {
                 $arr_insert = array(
                     "title" => $post['title'],
