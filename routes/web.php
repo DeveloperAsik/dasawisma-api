@@ -40,7 +40,17 @@ Route::post('/update/menu', 'Api\Prefferences\MenuController@update')->name('upd
 //fetching data icon
 Route::get('/fetch/icon', 'Api\Master\IconController@get_list')->name('get-list-icon');
 
+//fetching report
+Route::get('/fetch/report-incidents', 'Api\Reports\IncidentsController@get_list')->name('get-list-reports-incidents');
+Route::get('/find/report-incidents', 'Api\Reports\IncidentsController@find')->name('find-reports-incidents');
+Route::post('/transmit/report-incident', 'Api\Reports\IncidentsController@insert')->name('transmit-report-incidents');
+Route::get('/latest/report-incidents', 'Api\Reports\IncidentsController@get_latest_list')->name('get-latest-reports-incidents');
 
+Route::get('/latest/activity', 'Api\Settings\UserController@get_latest_activity')->name('get-latest-activity');
+
+Route::get('/fetch/citizen/{key}', 'Api\Master\CitizenController@get_list')->name('get-list-citizen');
+Route::get('/fetch/family/', 'Api\Master\FamilyController@get_list')->name('get-list-family');
+Route::get('/fetch/children', 'Api\Reports\IncidentsController@get_list')->name('get-list-reports');
 ////fetching data location
 //Route::get('/fetch/countries', 'Api\Locations\CountryController@get_list')->name('get-list-country');
 //Route::post('/fetch/countries', 'Api\Locations\CountryController@find')->name('get-country');

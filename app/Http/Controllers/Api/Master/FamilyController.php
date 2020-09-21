@@ -10,6 +10,9 @@ namespace App\Http\Controllers\Api\Master;
 
 use App\Http\Controllers\Controller;
 use App\Http\Libraries\Tools;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
 use App\Model\Tbl_user_tokens;
 use App\Model\Tbl_b_familes;
 use App\Model\Tbl_a_countries;
@@ -21,7 +24,6 @@ use App\Model\Tbl_b_parents;
 use App\Model\Tbl_b_legal_id_numbers;
 use App\Model\Tbl_b_family_childs;
 use App\Model\Tbl_b_childrens;
-use Request;
 
 /**
  * Description of FamilyController
@@ -33,10 +35,9 @@ class FamilyController extends Controller {
     //put your code here
 
 
-    public function get_list() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+    public function get_list(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $Tbl_b_familes = new Tbl_b_familes();
             $family = $Tbl_b_familes->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_familes', 'conditions' => array('where' => array('a.is_active' => '="1"'))));
@@ -160,10 +161,9 @@ class FamilyController extends Controller {
         }
     }
 
-    public function find() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+    public function find(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $post = Request::post();
             if (isset($post) && !empty($post)) {
@@ -287,10 +287,9 @@ class FamilyController extends Controller {
         }
     }
 
-    public function get_person_details() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+    public function get_person_details(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $post = Request::post();
             $arr_person = array();
@@ -322,7 +321,7 @@ class FamilyController extends Controller {
         }
     }
 
-    public function insert() {
+    public function insert(Request $request) {
         $token = Request::header('token');
         $Tbl_user_tokens = new Tbl_user_tokens();
         $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));

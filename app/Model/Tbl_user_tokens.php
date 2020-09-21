@@ -16,9 +16,8 @@ use App\MY_Model;
  * @author root
  */
 class Tbl_user_tokens extends MY_Model {
-
     //put your code here
-    protected $table_name = 'tbl_user_tokens';
+    public $table_name = 'tbl_user_tokens';
 
     public function __construct() {
         parent::__construct();

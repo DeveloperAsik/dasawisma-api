@@ -9,7 +9,10 @@
 namespace App\Http\Controllers\Api\Reports;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use App\Http\Libraries\Tools;
+//import model
+use Illuminate\Support\Facades\DB;
 use App\Model\Tbl_user_tokens;
 use App\Model\Tbl_c_report_incidents;
 use App\Model\Tbl_d_integrated_service_posts;
@@ -20,7 +23,6 @@ use App\Model\Tbl_a_provinces;
 use App\Model\Tbl_a_districts;
 use App\Model\Tbl_a_sub_districts;
 use App\Model\Tbl_a_areas;
-use Request;
 
 /**
  * Description of IncidentsController
@@ -31,14 +33,25 @@ class IncidentsController extends Controller {
 
     //put your code here
 
-
-    public function get_list() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+    public function get_list(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $Tbl_c_report_incidents = new Tbl_c_report_incidents();
-            $report_incidents = $Tbl_c_report_incidents->find('all', array('fields' => 'all', 'table_name' => 'tbl_c_report_incidents', 'conditions' => array('where' => array('a.is_active' => '="1"'))));
+            $report_incidents = $Tbl_c_report_incidents->find('all', array(
+                'fields' => 'all',
+                'table_name' => 'tbl_c_report_incidents',
+                'conditions' => array(
+                    'where' => array(
+                        'a.is_active' => '=1'
+                    )
+                ),
+                'limit' => array(
+                    'offset' => $request->input('page'),
+                    'perpage' => $request->input('total')
+                )
+                    )
+            );
             if (isset($report_incidents) && !empty($report_incidents) && $report_incidents != null) {
                 $res = array();
                 foreach ($report_incidents AS $key => $value) {
@@ -108,79 +121,121 @@ class IncidentsController extends Controller {
         }
     }
 
-    public function find() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+    public function find(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            if (isset($post) && !empty($post)) {
-                $id = '';
-                $by = '';
-                if (isset($post['id']) && !empty($post['id'])) {
-                    $by = 'a.id';
-                    $id = base64_decode($post['id']);
-                } elseif (isset($post['integrated_services_post_id']) && !empty($post['integrated_services_post_id'])) {
-                    $by = 'a.integrated_services_post_id';
-                    $id = base64_decode($post['integrated_services_post_id']);
-                } elseif (isset($post['type_id']) && !empty($post['type_id'])) {
-                    $by = 'a.type_id';
-                    $id = base64_decode($post['type_id']);
-                } elseif (isset($post['level_id']) && !empty($post['level_id'])) {
-                    $by = 'a.level_id';
-                    $id = base64_decode($post['level_id']);
-                } elseif (isset($post['country_id']) && !empty($post['country_id'])) {
-                    $by = 'a.country_id';
-                    $id = base64_decode($post['country_id']);
-                } elseif (isset($post['province_id']) && !empty($post['province_id'])) {
-                    $by = 'a.province_id';
-                    $id = base64_decode($post['province_id']);
-                } elseif (isset($post['district_id']) && !empty($post['district_id'])) {
-                    $by = 'a.district_id';
-                    $id = base64_decode($post['district_id']);
-                } elseif (isset($post['sub_district_id']) && !empty($post['sub_district_id'])) {
-                    $by = 'a.sub_district_id';
-                    $id = base64_decode($post['sub_district_id']);
-                } elseif (isset($post['area_id']) && !empty($post['area_id'])) {
-                    $by = 'a.area_id';
-                    $id = base64_decode($post['area_id']);
+            $get = $request->input();
+            if (isset($get) && !empty($get)) {
+                $conditions = array(
+                    'where' => array(
+                        'a.is_active' => '=1'
+                    )
+                );
+                $keyword = $request->input('keyword');
+                $conditions_or = array();
+                if (isset($keyword) && !empty($keyword)) {
+                    $conditions_or = array(
+                        'or' => array(
+                            'a.id' => $keyword,
+                            'a.title' => '="' . $keyword . '"',
+                            'b.name' => '="' . $keyword . '"',
+                            'c.name' => '="' . $keyword . '"',
+                            'd.name' => '="' . $keyword . '"',
+                            'e.name' => '="' . $keyword . '"',
+                            'f.name' => '="' . $keyword . '"',
+                            'g.name' => '="' . $keyword . '"',
+                            'h.name' => '="' . $keyword . '"',
+                            'i.name' => '="' . $keyword . '"',
+                        )
+                    );
                 }
+                $where = array_merge($conditions, $conditions_or);
                 $Tbl_c_report_incidents = new Tbl_c_report_incidents();
-                $report_incidents = $Tbl_c_report_incidents->find('all', array('fields' => 'all', 'table_name' => 'tbl_c_report_incidents', 'conditions' => array('where' => array('a.is_active' => '="1"', $by => '="' . $id . '"'))));
+                $report_incidents = $Tbl_c_report_incidents->find('all', array(
+                    'fields' => 'a.id IncidentID, a.title IncindentTitle, a.description IncidentDesc, a.additional_info IncidentInfo, a.created_date IncidentCreateDate, b.id ServicePostID, b.code ServicePostCode, b.name ServicePostName, b.liable_by ServicePostLiableBy, b.address ServicePostAddress, c.id ReportTypeID, c.name ReportTypeName, d.id ReportLevelID, d.name ReportLevelName, e.id CountryID, e.name CountryName, f.id ProvinceID, f.name ProvinceName, g.id DistrictID, g.name DistrictName, h.id SubDistricyID, h.name SubDistrictName, i.id AreaID, i.name AreaName',
+                    'table_name' => 'tbl_c_report_incidents',
+                    'conditions' => $where,
+                    'joins' => array(
+                        array(
+                            'table_name' => 'tbl_d_integrated_service_posts b',
+                            'conditions' => 'b.id = a.integrated_services_post_id',
+                            'type' => 'left'
+                        ),
+                        array(
+                            'table_name' => 'tbl_c_report_types c',
+                            'conditions' => 'c.id = a.type_id',
+                            'type' => 'left'
+                        ),
+                        array(
+                            'table_name' => 'tbl_c_report_incident_levels d',
+                            'conditions' => 'd.id = a.level_id',
+                            'type' => 'left'
+                        ),
+                        array(
+                            'table_name' => 'tbl_a_countries e',
+                            'conditions' => 'e.id = a.country_id',
+                            'type' => 'left'
+                        ),
+                        array(
+                            'table_name' => 'tbl_a_provinces f',
+                            'conditions' => 'f.id = a.province_id',
+                            'type' => 'left'
+                        ),
+                        array(
+                            'table_name' => 'tbl_a_districts g',
+                            'conditions' => 'g.id = a.district_id',
+                            'type' => 'left'
+                        ),
+                        array(
+                            'table_name' => 'tbl_a_sub_districts h',
+                            'conditions' => 'h.id = a.sub_district_id',
+                            'type' => 'left'
+                        ),
+                        array(
+                            'table_name' => 'tbl_a_areas i',
+                            'conditions' => 'i.id = a.area_id',
+                            'type' => 'left'
+                        )
+                    ),
+                    'limit' => array(
+                        'offset' => $request->input('page'),
+                        'perpage' => $request->input('total')
+                    )
+                        )
+                );
                 if (isset($report_incidents) && !empty($report_incidents) && $report_incidents != null) {
                     $res = array();
                     foreach ($report_incidents AS $key => $value) {
-                        //get isp
-                        $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
-                        $isp = $Tbl_d_integrated_service_posts->find('first', array('fields' => 'all', 'table_name' => 'tbl_d_integrated_service_posts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->integrated_services_post_id . '"'))));
-
-                        //get type
-                        $Tbl_c_report_types = new Tbl_c_report_types();
-                        $report_type = $Tbl_c_report_types->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_types', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->type_id . '"'))));
-
+//                        //get isp
+//                        $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
+//                        $isp = $Tbl_d_integrated_service_posts->find('first', array('fields' => 'all', 'table_name' => 'tbl_d_integrated_service_posts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->integrated_services_post_id . '"'))));
+//
+//                        //get type
+//                        $Tbl_c_report_types = new Tbl_c_report_types();
+//                        $report_type = $Tbl_c_report_types->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_types', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->type_id . '"'))));
                         //get level
-                        $Tbl_c_report_incident_levels = new Tbl_c_report_incident_levels();
-                        $report_incident_level = $Tbl_c_report_incident_levels->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_incident_levels', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->level_id . '"'))));
-
-                        //get country
-                        $Tbl_a_countries = new Tbl_a_countries();
-                        $country = $Tbl_a_countries->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->country_id . '"'))));
-
+//                        $Tbl_c_report_incident_levels = new Tbl_c_report_incident_levels();
+//                        $report_incident_level = $Tbl_c_report_incident_levels->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_incident_levels', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->level_id . '"'))));
+//
+//                        //get country
+//                        $Tbl_a_countries = new Tbl_a_countries();
+//                        $country = $Tbl_a_countries->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->country_id . '"'))));
                         //get province
-                        $Tbl_a_provinces = new Tbl_a_provinces();
-                        $province = $Tbl_a_provinces->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_provinces', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->province_id . '"'))));
-
-                        //get district
-                        $Tbl_a_districts = new Tbl_a_districts();
-                        $district = $Tbl_a_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->district_id . '"'))));
-
-                        //get sub - district
-                        $Tbl_a_sub_districts = new Tbl_a_sub_districts();
-                        $sub_district = $Tbl_a_sub_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_sub_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->sub_district_id . '"'))));
-
-                        //get area
-                        $Tbl_a_areas = new Tbl_a_areas();
-                        $area = $Tbl_a_areas->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->area_id . '"'))));
+//                        $Tbl_a_provinces = new Tbl_a_provinces();
+//                        $province = $Tbl_a_provinces->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_provinces', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->province_id . '"'))));
+//
+//                        //get district
+//                        $Tbl_a_districts = new Tbl_a_districts();
+//                        $district = $Tbl_a_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->district_id . '"'))));
+//
+//                        //get sub - district
+//                        $Tbl_a_sub_districts = new Tbl_a_sub_districts();
+//                        $sub_district = $Tbl_a_sub_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_sub_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->sub_district_id . '"'))));
+//
+//                        //get area
+//                        $Tbl_a_areas = new Tbl_a_areas();
+//                        $area = $Tbl_a_areas->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->area_id . '"'))));
                         $res[] = array(
                             'id' => $value->id,
                             'title' => $value->title,
@@ -223,12 +278,12 @@ class IncidentsController extends Controller {
         }
     }
 
-    public function insert() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+    public function insert(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $post = Request::post();
+            debug($post);
             if (isset($post) && !empty($post)) {
                 $arr_insert = array(
                     "title" => $post['title'],
@@ -253,6 +308,29 @@ class IncidentsController extends Controller {
                 } else {
                     return json_encode(array('status' => 201, 'message' => 'Failed transmit data into db', 'data' => null));
                 }
+            }
+        } else {
+            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
+        }
+    }
+
+    public function get_latest_list(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first(); //$Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+        if (isset($user_token) && !empty($user_token)) {
+            $offset = $request->input('page') - 1;
+            //debug($user_token->user_id);
+            $result = DB::table('tbl_c_report_incidents')->select('tbl_c_report_incidents.id AS report_incident_id', 'tbl_c_report_incidents.title', 'tbl_c_report_incidents.created_date', 'tbl_users.id', 'tbl_users.username')->where('tbl_c_report_incidents.is_active', 1)->where('tbl_c_report_incidents.created_by', $user_token->user_id)->join('tbl_users', 'tbl_users.id', '=', 'tbl_c_report_incidents.created_by')->limit($request->input('total'))->offset($offset)->get();
+            $response = array();
+            if (isset($result) && !empty($result)) {
+                foreach ($result AS $key => $val) {
+                    $response[] = $val->username . ' create report by id ' . $val->report_incident_id . ' at ' . $val->created_date . ' with title ' . $val->title;
+                }
+            }
+            if ($response) {
+                return json_encode(array('status' => 200, 'message' => 'Success fetching data report log', 'data' => $response));
+            } else {
+                return json_encode(array('status' => 201, 'message' => 'Failed fetching data report log', 'data' => null));
             }
         } else {
             return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));

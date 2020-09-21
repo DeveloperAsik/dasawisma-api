@@ -23,10 +23,19 @@ class ContentController extends Controller {
 
     //put your code here
 
+    //public function get_list(Request $request) {
+    //    $token = $request->input('token');
+    //    debug($token);
+    //    $Tbl_user_tokens = new Tbl_user_tokens();
+    //    $user_token = $Tbl_user_tokens->find('all', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '= 1', 'a.token_generated' => '="' . $token . '"'))));
+    //    if (isset($user_token) && !empty($user_token)) {
+    //        dd($user_token);
+    //    }
+    //}
+
     public function get_list(Request $request) {
         $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '= 1', 'a.token_generated' => '="' . $token . '"'))));
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $Tbl_contents = new Tbl_contents();
             $res = $Tbl_contents->find('all', array(
@@ -84,8 +93,7 @@ class ContentController extends Controller {
 
     public function find(Request $request) {
         $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $Tbl_contents = new Tbl_contents();
             $res = $Tbl_contents->find('all', array(

@@ -99,6 +99,7 @@ class MY_Model extends Model {
             //conditions
             $conditions = '';
             if (isset($options['conditions']) && !empty($options['conditions'])) {
+                
                 $cond_key = array_keys($options['conditions']);
                 foreach ($cond_key AS $key => $values) {
                     switch ($values) {
@@ -121,7 +122,7 @@ class MY_Model extends Model {
                         case 'or':
                             if (count($options['conditions']['or']) == 1) {
                                 $cond_or = array_keys($options['conditions']['or'])[0];
-                                $conditions .= " WHERE " . $cond_or . ' ' . ($options['conditions']['or'][$cond_or]);
+                                $conditions .= " OR " . $cond_or . ' ' . ($options['conditions']['or'][$cond_or]);
                             } else {
                                 foreach ($cond_key AS $key => $val) {
                                     $where_key = array_keys($options['conditions'][$val]);
@@ -315,5 +316,4 @@ class MY_Model extends Model {
         //DB::table($table_name)->delete()->where($by, '=', $id)->delete();
         return true;
     }
-
 }

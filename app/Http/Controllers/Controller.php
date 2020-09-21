@@ -80,23 +80,23 @@ class Controller extends BaseController {
             $name = $post['module_name'];
             $res = array();
             $Tbl_menus = new Tbl_menus();
-            $menu_1 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "1"', 'a.module_id' => '= "' . $id . '"', 'a.is_logged_in' => '= "' . $logged . '"'))));
+            $menu_1 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'order' => array('key' => 'rank', 'type' => 'ASC'), 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "1"', 'a.module_id' => '= "' . $id . '"', 'a.is_logged_in' => '= "' . $logged . '"'))));
             $arr1 = array();
             if (isset($menu_1) && !empty($menu_1)) {
                 foreach ($menu_1 AS $keyword => $values) {
-                    $menu_2 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "2"', 'a.module_id' => '= "' . $id . '"', 'a.parent_id' => '= "' . $values->id . '"'))));
+                    $menu_2 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'order' => array('key' => 'rank', 'type' => 'ASC'), 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "2"', 'a.module_id' => '= "' . $id . '"', 'a.parent_id' => '= "' . $values->id . '"'))));
                     $arr2 = array();
                     if (isset($menu_2) && !empty($menu_2)) {
                         foreach ($menu_2 AS $keyword2 => $values2) {
-                            $menu_3 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "3"', 'a.module_id' => '= "' . $id . '"', 'a.parent_id' => '= "' . $values2->id . '"'))));
+                            $menu_3 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'order' => array('key' => 'rank', 'type' => 'ASC'), 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "3"', 'a.module_id' => '= "' . $id . '"', 'a.parent_id' => '= "' . $values2->id . '"'))));
                             $arr3 = array();
                             if (isset($menu_3) && !empty($menu_3)) {
                                 foreach ($menu_3 AS $keyword3 => $values3) {
-                                    $menu_4 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "4"', 'a.module_id' => '= "' . $id . '"', 'a.parent_id' => '= "' . $values3->id . '"'))));
+                                    $menu_4 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'order' => array('key' => 'rank', 'type' => 'ASC'), 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "4"', 'a.module_id' => '= "' . $id . '"', 'a.parent_id' => '= "' . $values3->id . '"'))));
                                     $arr4 = array();
                                     if (isset($menu_4) && !empty($menu_4)) {
                                         foreach ($menu_4 AS $keyword4 => $values4) {
-                                            $menu_5 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "5"', 'a.module_id' => '= "' . $id . '"', 'a.parent_id' => '= "' . $values4->id . '"'))));
+                                            $menu_5 = $Tbl_menus->find('all', array('fields' => 'all', 'table_name' => 'tbl_menus', 'order' => array('key' => 'rank', 'type' => 'ASC'), 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.is_cms' => '= "1"', 'a.level' => '= "5"', 'a.module_id' => '= "' . $id . '"', 'a.parent_id' => '= "' . $values4->id . '"'))));
                                             $arr5 = array();
                                             if (isset($menu_5) && !empty($menu_5)) {
                                                 foreach ($menu_5 AS $keyword5 => $values5) {

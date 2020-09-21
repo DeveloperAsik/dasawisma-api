@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Libraries\Auth;
 use App\Http\Libraries\Tools_Library;
+use Illuminate\Support\Facades\DB;
 use App\Model\Tbl_user_tokens;
 use App\Model\Tbl_users;
 use App\Model\Tbl_user_groups;
@@ -94,8 +95,7 @@ class UserController extends Controller {
 
     public function drop_user_session(Request $request) {
         $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             Auth::session_data_clear($user_token);
             return json_encode(array('status' => 200, 'message' => 'Successfully delete user session', 'data' => null));
@@ -106,9 +106,8 @@ class UserController extends Controller {
 
     public function is_logged_in(Request $request) {
         $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '= 1', 'a.is_guest' => '=0', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
+         if (isset($user_token) && !empty($user_token)) {
             return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => array('logged_in' => true)));
         } else {
             return json_encode(array('status' => 200, 'message' => 'youre not in logged in session', 'data' => array('logged_in' => false)));
@@ -117,8 +116,7 @@ class UserController extends Controller {
 
     public function get_user_details(Request $request) {
         $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $user = Tbl_users::find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'id' => '="' . $user_token->user_id . '"'))));
             $group_user = Tbl_user_groups::find('first', array('fields' => 'all', 'table_name' => 'tbl_user_groups', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.user_id' => '="' . $user_token->user_id . '"'))));
@@ -142,8 +140,7 @@ class UserController extends Controller {
 
     public function get_user_permissions(Request $request) {
         $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $user_group = Tbl_user_groups::find('first', array('fields' => 'all', 'table_name' => 'tbl_user_groups', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.user_id' => '="' . $user_token->user_id . '"'))));
             $res = Tbl_group_permissions::query("SELECT * FROM `tbl_group_permissions` a LEFT JOIN tbl_permissions b ON a.permission_id = b.id WHERE a.group_id = '" . $user_group->group_id . "' ORDER BY b.module ASC");
@@ -155,12 +152,36 @@ class UserController extends Controller {
 
     public function verify_password(Request $request) {
         $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => null));
         } else {
             return json_encode(array('status' => 201, 'message' => 'youre not in logged in session', 'data' => null));
+        }
+    }
+
+    public function get_latest_activity(Request $request) {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first(); //$Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
+        if (isset($user_token) && !empty($user_token)) {
+            $data = array(
+                array(
+                    'ini hanya data dummy 1'
+                ),
+                array(
+                    'ini hanya data dummy 2'
+                ),
+                array(
+                    'ini hanya data dummy 3'
+                ),
+                array(
+                    'ini hanya data dummy 4'
+                ),
+                array(
+                    'ini hanya data dummy 5'
+                )
+            );
+            return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => $data));
         }
     }
 
