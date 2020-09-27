@@ -22,6 +22,7 @@ use App\Model\Tbl_a_provinces;
 use App\Model\Tbl_a_districts;
 use App\Model\Tbl_a_sub_districts;
 use App\Model\Tbl_a_areas;
+use PDF;
 
 /**
  * Description of IncidentsController
@@ -31,7 +32,6 @@ use App\Model\Tbl_a_areas;
 class IncidentsController extends Controller {
 
     //put your code here
-
     public function get_list(Request $request) {
         $token = $request->input('token');
         $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
@@ -108,7 +108,12 @@ class IncidentsController extends Controller {
                         'created_date' => $value->created_date,
                     );
                 }
-                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
+                if ($request->input('export') == 'excel') {
+                    $file_excel = $this->_path_files . '/excels/data-laporan-dummy.xls';
+                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('export' => array('excel' => $file_excel)), 'data' => $res));
+                } else {
+                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
+                }
             } else {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
             }
@@ -267,8 +272,7 @@ class IncidentsController extends Controller {
             $response = array();
             if (isset($result) && !empty($result)) {
                 foreach ($result AS $key => $val) {
-                    $response[] = 'user '.$val->username .'[user-id:'. $val->user_id .'] | create report : ' . $val->title .'[report-id' . $val->report_incident_id .'] | ' . date('d M Y', strtotime($val->created_date));
-                    
+                    $response[] = 'user ' . $val->username . '[user-id:' . $val->user_id . '] | create report : ' . $val->title . '[report-id' . $val->report_incident_id . '] | ' . date('d M Y', strtotime($val->created_date));
                 }
             }
             if ($response) {
@@ -278,6 +282,23 @@ class IncidentsController extends Controller {
             }
         } else {
             return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
+        }
+    }
+
+    public function export(Request $request, $type = 'pdf') {
+        $token = $request->input('token');
+        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
+        if (isset($user_token) && !empty($user_token)) {
+            $res = $this->get_list($request);
+            debug($res);
+            if ($request->input('export') == 'pdf') {
+                $pdf = PDF::loadview('Apps.File.PDF.' . _export_to_pdf)->setPaper('A4', 'potrait');
+                return $pdf->stream();
+            } else {
+                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
+            }
+        } else {
+            return json_encode(array('status' => 201, 'message' => 'Token miss match or expired', 'data' => null));
         }
     }
 
