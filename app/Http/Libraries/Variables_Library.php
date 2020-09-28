@@ -67,7 +67,8 @@ class Variables_Library {
             '_path_app_helper' => 'Apps.Helpers,',
             '_path_app_global_js' => 'Apps.Helpers.global_js',
             '_path_app_view_js' => 'Apps.Pages' . $path_view_js,
-            '_path_app_view_html' => 'Apps.Pages' . $path_view_html
+            '_path_app_view_html' => 'Apps.Pages' . $path_view_html,
+            '_base_path_assets' => config('app.base_path_assets')
         ]);
     }
 

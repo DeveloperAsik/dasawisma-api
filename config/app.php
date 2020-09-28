@@ -4,12 +4,15 @@ $base_api_url = '';
 switch (env('APP_ENV')) {
     case 'local' :
         $base_api_url = env('APP_API_URI_LOCAL');
+        $base_path_assets = env('APP_PATH_SERVER_LOCAL');
         break;
     case 'rc' :
         $base_api_url = env('APP_API_URI_RC');
+        $base_path_assets = env('APP_PATH_SERVER_RC');
         break;
     default :
         $base_api_url = env('APP_API_URI_PROD');
+        $base_path_assets = env('APP_PATH_SERVER_PROD');
         break;
 }
 return [
@@ -26,6 +29,7 @@ return [
 
     'name' => env('APP_NAME', 'Laravel'),
     'base_api_uri' => $base_api_url,
+    'base_path_assets' => $base_path_assets,
     /*
       |--------------------------------------------------------------------------
       | Application Environment
