@@ -174,6 +174,18 @@ class Auth {
                     if (isset($user_device_exist) && !empty($user_device_exist)) {
                         foreach ($user_device_exist AS $Key => $values) {
                             if ($values->user_id) {
+                                $users = $Tbl_user_devices->find('all', array(
+                                    'fields' => 'all',
+                                    'table_name' => 'tbl_user_devices',
+                                    'conditions' => array(
+                                        'where' => array(
+                                            'a.is_active' => '= "1"',
+                                            'a.user_id' => '="' . $values->user_id . '"'
+                                        )
+                                    )
+                                        )
+                                );
+                                debug($users);
                                 DB::table('tbl_user_devices')->delete()->where('user_id', '=', $values->user_id)->delete();
                             }
                         }

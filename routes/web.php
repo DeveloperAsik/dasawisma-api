@@ -50,7 +50,7 @@ Route::get('/latest/activity', 'Api\Settings\UserController@get_latest_activity'
 
 Route::get('/fetch/citizen/{key}', 'Api\Master\CitizenController@get_list')->name('get-list-citizen');
 Route::get('/fetch/family/', 'Api\Master\FamilyController@get_list')->name('get-list-family');
-Route::get('/fetch/children', 'Api\Reports\IncidentsController@get_list')->name('get-list-reports');
+Route::get('/fetch/children', 'Api\Master\ChildrenController@get_list')->name('get-list-children');
 
 ////fetching data location
 Route::get('/fetch/countries', 'Api\Locations\CountryController@get_list')->name('get-list-country');
