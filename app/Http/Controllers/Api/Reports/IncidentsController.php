@@ -108,9 +108,15 @@ class IncidentsController extends Controller {
                         'created_date' => $value->created_date,
                     );
                 }
-                if ($request->input('export') == 'excel') {
-                    $file_excel = $this->_path_files . '/excels/data-laporan-dummy.xls';
-                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('export' => array('excel' => $file_excel)), 'data' => $res));
+                if ($request->input('export')) {
+                    if ($request->input('export') == 'excel') {
+                        $file_ = $this->_path_files . '/excels/data-laporan-dummy.xls';
+                        $type = 'excel';
+                    } elseif ($request->input('export') == 'pdf') {
+                        $file_ = $this->_path_files . '/pdf/data-laporan-dummy.pdf';
+                        $type = 'pdf';
+                    }
+                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('export' => array($type => $file_)), 'data' => $res));
                 } else {
                     return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
                 }
@@ -290,7 +296,6 @@ class IncidentsController extends Controller {
         $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
             $res = $this->get_list($request);
-            debug($res);
             if ($request->input('export') == 'pdf') {
                 $pdf = PDF::loadview('Apps.File.PDF.' . _export_to_pdf)->setPaper('A4', 'potrait');
                 return $pdf->stream();
