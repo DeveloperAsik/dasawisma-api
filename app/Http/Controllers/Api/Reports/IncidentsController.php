@@ -51,7 +51,13 @@ class IncidentsController extends Controller {
                             ->limit($request->input('total'))->offset($offset)->get();
             if (isset($report_incidents) && !empty($report_incidents) && $report_incidents != null) {
                 $res = array();
-
+                if ($request->input('export')) {
+                    if ($request->input('export') == 'excel') {
+                        $type = 'excel';
+                    } elseif ($request->input('export') == 'pdf') {
+                        $type = 'pdf';
+                    }
+                }
                 foreach ($report_incidents AS $key => $value) {
                     //get isp
                     $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
@@ -84,7 +90,7 @@ class IncidentsController extends Controller {
                     //get area
                     $Tbl_a_areas = new Tbl_a_areas();
                     $area = $Tbl_a_areas->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->area_id . '"'))));
-                    $res[] = array(
+                    $result = array(
                         'id' => $value->id,
                         'title' => $value->title,
                         'description' => $value->description,
@@ -109,15 +115,20 @@ class IncidentsController extends Controller {
                         'created_by' => $value->created_by,
                         'created_date' => $value->created_date,
                     );
+                    $single_export = json_decode($this->_export_to($request->input('export'), array($result), array('title' => strtolower(str_replace(' ', '-', 'laporan-dasawisma-' . $value->title . '-' . date('dmyh'))))));
+                    if ($single_export->status == 200) {
+                        $res[] = array_merge($result, array('meta' => array('export' => array($type => $single_export->data->path))));
+                    } else {
+                        $res[] = $result;
+                    }
                 }
                 if ($request->input('export')) {
                     $export = json_decode($this->_export_to($request->input('export'), $res, array()));
-                    if ($request->input('export') == 'excel') {
-                        $type = 'excel';
-                    } elseif ($request->input('export') == 'pdf') {
-                        $type = 'pdf';
+                    if ($export->status == 200) {
+                        $file_ = $export->data->path;
+                    } else {
+                        $file_ = '';
                     }
-                    $file_ = $export->data->path;
                 } else {
                     $file_ = '';
                     $type = '';
@@ -281,7 +292,6 @@ class IncidentsController extends Controller {
         $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first(); //$Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
         if (isset($user_token) && !empty($user_token)) {
             $offset = $request->input('page') - 1;
-            //debug($user_token->user_id);
             $result = DB::table('tbl_c_report_incidents')->select('tbl_c_report_incidents.id AS report_incident_id', 'tbl_c_report_incidents.title', 'tbl_c_report_incidents.created_date', 'tbl_users.id AS user_id', 'tbl_users.username')->where('tbl_c_report_incidents.is_active', 1)->where('tbl_c_report_incidents.created_by', $user_token->user_id)->join('tbl_users', 'tbl_users.id', '=', 'tbl_c_report_incidents.created_by')->limit($request->input('total'))->offset($offset)->get();
             $response = array();
             if (isset($result) && !empty($result)) {
@@ -301,7 +311,7 @@ class IncidentsController extends Controller {
 
     public function _export_to($type = 'pdf', $data = array(), $options = array()) {
         $res = json_decode(json_encode($data));
-        $export_file_title = 'laporan_dasawsima_bogor_timur_' . date('dmyhis_');
+        $export_file_title = 'laporan_dasawsima_bogor_timur_' . date('dmyh_');
         if (isset($options) && !empty($options)) {
             $export_file_title = $options['title'];
         }
@@ -368,82 +378,6 @@ class IncidentsController extends Controller {
             $path = '';
         }
         return json_encode(array('status' => 200, 'message' => 'Successfully create download file .', 'data' => array('type' => $type, 'path' => $path)));
-    }
-
-    public function export(Request $request, $type = 'pdf') {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            $res = json_decode($this->get_list($request));
-            $exp_name = 'laporan_dasawisma_kota_bogor_kec_bogor_timur_' . date('dmyhis');
-            $spreadsheet = new Spreadsheet();
-            $sheet = $spreadsheet->getActiveSheet();
-
-            $sheet->setCellValue('B3', 'Rekap data laporan dasawisma ' . date('d M Y'));
-            $sheet->setCellValue('B4', 'No');
-            $sheet->setCellValue('C4', 'Id');
-            $sheet->setCellValue('D4', 'Judul');
-            $sheet->setCellValue('E4', 'Deskripsi');
-            $sheet->setCellValue('F4', 'Info Tambahan');
-            $sheet->setCellValue('G4', 'Posyandu');
-            $sheet->setCellValue('H4', 'Tipe Laporan');
-            $sheet->setCellValue('I4', 'Level Kepentingan');
-            $sheet->setCellValue('J4', 'Negara');
-            $sheet->setCellValue('K4', 'Provinsi');
-            $sheet->setCellValue('L4', 'Kota/Kabupaten');
-            $sheet->setCellValue('M4', 'Kecamatan');
-            $sheet->setCellValue('N4', 'Area');
-            if ($res->status == 200) {
-                $cell = 5;
-                $cell_str = 'B';
-                $no = 1;
-                foreach ($res->data AS $key => $value) {
-                    $sheet->setCellValue($cell_str . $cell, $no);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->id);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->title);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->description);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->additional_info);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->integrated_services_post_name);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->type_name);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->level_name);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->country_name);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->province_name);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->district_name);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->sub_district_name);
-                    $cell_str++;
-                    $sheet->setCellValue($cell_str . $cell, $value->area_name);
-                    $cell++;
-                    $no++;
-                    $cell_str = 'B';
-                }
-            }
-            if ($request->input('export') == 'pdf') {
-                $writer = new \PhpOffice\PhpSpreadsheet\Writer\Pdf\Mpdf($spreadsheet);
-                $writer->save($this->_base_path_assets . '/files/pdf/' . $exp_name . ".pdf");
-                $path = $this->_path_files . '/pdf/' . $exp_name . ".pdf";
-            } elseif ($request->input('export') == 'excel') {
-                $writer = new Xlsx($spreadsheet);
-                $res = $writer->save($this->_base_path_assetsw . '/files/excels/' . $exp_name . '.xlsx');
-                $path = $this->_path_files . '/excels/' . $exp_name . ".xlsx";
-            } else {
-                $res = null;
-                $path = '';
-            }
-            return json_encode(array('status' => 200, 'message' => 'Successfully create download file .', 'data' => array('path' => $path)));
-        } else {
-            return json_encode(array('status' => 201, 'message' => 'Token miss match or expired', 'data' => null));
-        }
     }
 
 }
