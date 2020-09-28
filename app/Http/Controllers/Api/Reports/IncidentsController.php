@@ -50,6 +50,18 @@ class IncidentsController extends Controller {
                             ->limit($request->input('total'))->offset($offset)->get();
             if (isset($report_incidents) && !empty($report_incidents) && $report_incidents != null) {
                 $res = array();
+                if ($request->input('export')) {
+                    if ($request->input('export') == 'excel') {
+                        $file_ = $this->_path_files . '/excels/data-laporan-dummy.xls';
+                        $type = 'excel';
+                    } elseif ($request->input('export') == 'pdf') {
+                        $file_ = $this->_path_files . '/pdf/data-laporan-dummy.pdf';
+                        $type = 'pdf';
+                    }
+                } else {
+                    $file_ = '';
+                    $type = '';
+                }
                 foreach ($report_incidents AS $key => $value) {
                     //get isp
                     $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
@@ -106,16 +118,10 @@ class IncidentsController extends Controller {
                         'is_active' => $value->is_active,
                         'created_by' => $value->created_by,
                         'created_date' => $value->created_date,
+                        'meta' => array($type => $file_)
                     );
                 }
                 if ($request->input('export')) {
-                    if ($request->input('export') == 'excel') {
-                        $file_ = $this->_path_files . '/excels/data-laporan-dummy.xls';
-                        $type = 'excel';
-                    } elseif ($request->input('export') == 'pdf') {
-                        $file_ = $this->_path_files . '/pdf/data-laporan-dummy.pdf';
-                        $type = 'pdf';
-                    }
                     return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('export' => array($type => $file_)), 'data' => $res));
                 } else {
                     return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
@@ -215,6 +221,7 @@ class IncidentsController extends Controller {
                             'is_active' => $value->is_active,
                             'created_by' => $value->created_by,
                             'created_date' => $value->created_date,
+                            'meta' => array('download' => '')
                         );
                     }
                     return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
