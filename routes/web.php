@@ -28,8 +28,8 @@ Route::get('/user-permissions', 'Api\Settings\UserController@get_user_permission
 //fetching data news/carousel/homepage content
 Route::get('/fetch/about', 'Api\Content\AboutController@get_list')->name('get-about');
 
-Route::get('/fetch/content', 'Api\Content\ContentController@get_list')->name('get-list-country');
-Route::get('/find/content', 'Api\Content\ContentController@find')->name('get-country');
+Route::get('/fetch/content', 'Api\Content\ContentController@get_list')->name('get-list-content');
+Route::get('/find/content', 'Api\Content\ContentController@find')->name('get-content');
 
 //fetching data menu
 Route::get('/fetch/menu', 'Api\Prefferences\MenuController@get_list')->name('get-list-menu');
