@@ -6,38 +6,36 @@
  * and open the template in the editor.
  */
 
-namespace App\Http\Controllers\Api\Locations;
+namespace App\Http\Controllers\Api\Reports;
 
 use App\Http\Controllers\Controller;
-use App\Model\Tbl_a_districts;
+use App\Model\Tbl_c_report_incident_levels;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 /**
- * Description of DistrictController
+ * Description of LevelController
  *
  * @author root
  */
-class DistrictController extends Controller {
+class LevelController extends Controller {
 
     //put your code here
+
     public function get_list(Request $request) {
         $token = $request->input('token');
         $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
         if (isset($user_token) && !empty($user_token)) {
-            $Tbl_a_districts = new Tbl_a_districts();
+            $Tbl_c_report_incident_levels = new Tbl_c_report_incident_levels();
             $offset = $request->input('page') - 1;
             $where = array('a.is_active' => '="1"');
             $conditions = array();
             if ($request->input('keyword')) {
                 $conditions = array_merge($where, array('a.name' => 'like "%' . $request->input('keyword') . '%"'));
-            }elseif($request->input('key')){
-                $conditions = array_merge($where, array('a.'.$request->input('key') => '='.$request->input('value')));
             }
-            dd($conditions);
-            $res = $Tbl_a_districts->find('all', array(
+            $res = $Tbl_c_report_incident_levels->find('all', array(
                 'fields' => 'all',
-                'table_name' => 'tbl_a_districts',
+                'table_name' => 'Tbl_c_report_incident_levels',
                 'conditions' => array('where' => $conditions),
                 'limit' => array(
                     'offset' => $offset,
@@ -48,10 +46,10 @@ class DistrictController extends Controller {
             if (isset($res) && !empty($res) && $res != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
+                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+            return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
         }
     }
 

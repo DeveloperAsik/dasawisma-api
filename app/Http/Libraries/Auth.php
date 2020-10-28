@@ -186,7 +186,7 @@ class Auth {
                                         )
                                 );
                                 if ($users) {
-                                    DB::table('tbl_user_devices')->delete()->where('user_id', '=', $values->user_id)->delete();
+                                    DB::table('tbl_user_devices')->where('user_id', '=', $values->user_id)->delete();
                                 }
                             }
                         }
@@ -378,7 +378,7 @@ class Auth {
             'table_name' => 'tbl_user_tokens',
             'conditions' => array(
                 'where' => array(
-                    'a.is_active' => '= "1"',
+                    'a.is_active' => '= 1',
                     'a.id' => '="' . $access_token . '"'
                 )
             )

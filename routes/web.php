@@ -71,6 +71,9 @@ Route::get('/fetch/areas', 'Api\Locations\AreaController@get_list')->name('get-l
 Route::get('/fetch/report-types', 'Api\Reports\TypesController@get_list')->name('get-list-report-types');
 //Route::post('/fetch/report-types', 'Api\Reports\TypesController@find')->name('get-report-types');
 //
+//
+Route::get('/fetch/report-level', 'Api\Reports\LevelController@get_list')->name('get-list-report-level');
+//
 ////fetching data master
 ////data integrated services posts (posyandu)
 //Route::get('/fetch/integrated-services-posts', 'Api\Master\IntegratedServicesPostController@get_list')->name('get-list-integrated-services-posts');
