@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Libraries\Auth;
 use App\Http\Libraries\Tools_Library;
 use Illuminate\Support\Facades\DB;
-use App\Model\Tbl_user_tokens;
+
 use App\Model\Tbl_users;
 use App\Model\Tbl_user_groups;
 use App\Model\Tbl_group_permissions;
@@ -34,9 +34,8 @@ class UserController extends Controller {
 
     public function validate_token(Request $request) {
         $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '=1', 'a.is_guest' => '=1', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
+        $user_token = DB::table('tbl_user_tokens AS a')->select('a.*')->where('a.is_active', 1)->Where('a.token_generated', 'like', '%' . $token . '%')->get();
+        if (isset($user_token[0]->token_generated) && !empty($user_token[0]->token_generated)) {
             return json_encode(array('status' => 200, 'message' => 'your token is valid', 'data' => array('valid' => true)));
         } else {
             return json_encode(array('status' => 200, 'message' => 'your token is not valid', 'data' => array('valid' => false)));
@@ -107,7 +106,7 @@ class UserController extends Controller {
     public function is_logged_in(Request $request) {
         $token = $request->input('token');
         $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-         if (isset($user_token) && !empty($user_token)) {
+        if (isset($user_token) && !empty($user_token)) {
             return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => array('logged_in' => true)));
         } else {
             return json_encode(array('status' => 200, 'message' => 'youre not in logged in session', 'data' => array('logged_in' => false)));
