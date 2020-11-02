@@ -18,6 +18,7 @@ Route::get('/generate-token-access', 'Api\Settings\UserController@generate_token
 Route::get('/generate-token-user', 'Api\Settings\UserController@generate_token_user')->name('generate-token-user');
 Route::get('/validate-token', 'Api\Settings\UserController@validate_token')->name('validate-token');
 Route::get('/verify-password', 'Api\Settings\UserController@verify_password')->name('verify-password');
+Route::get('/change-password', 'Api\Settings\UserController@change_password')->name('change-password');
 
 //user related
 Route::get('/drop-user-session', 'Api\Settings\UserController@drop_user_session')->name('drop-user-session');

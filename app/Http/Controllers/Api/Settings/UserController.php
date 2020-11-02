@@ -10,14 +10,13 @@ namespace App\Http\Controllers\Api\Settings;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+
+//load custom class
 use App\Http\Libraries\Auth;
 use App\Http\Libraries\Tools_Library;
-use Illuminate\Support\Facades\DB;
 
-use App\Model\Tbl_users;
-use App\Model\Tbl_user_groups;
-use App\Model\Tbl_group_permissions;
-use App\Model\Tbl_groups;
+//load DB class
+use Illuminate\Support\Facades\DB;
 
 /**
  * Description of UserController
@@ -30,16 +29,6 @@ class UserController extends Controller {
     public function index() {
         $data['title_for_layout'] = 'Selamat Datang di api.dasawisma.local';
         return view($this->_config_path_layout . 'Default.index', $data);
-    }
-
-    public function validate_token(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens AS a')->select('a.*')->where('a.is_active', 1)->Where('a.token_generated', 'like', '%' . $token . '%')->get();
-        if (isset($user_token[0]->token_generated) && !empty($user_token[0]->token_generated)) {
-            return json_encode(array('status' => 200, 'message' => 'your token is valid', 'data' => array('valid' => true)));
-        } else {
-            return json_encode(array('status' => 200, 'message' => 'your token is not valid', 'data' => array('valid' => false)));
-        }
     }
 
     public function generate_token_access(Request $request) {
@@ -92,11 +81,17 @@ class UserController extends Controller {
         }
     }
 
+    public function validate_token(Request $request) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            return json_encode(array('status' => 200, 'message' => 'your token is valid', 'data' => array('valid' => true)));
+        } else {
+            return json_encode(array('status' => 200, 'message' => 'your token is not valid', 'data' => array('valid' => false)));
+        }
+    }
+
     public function drop_user_session(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            Auth::session_data_clear($user_token);
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            Auth::session_data_clear($this->user_token);
             return json_encode(array('status' => 200, 'message' => 'Successfully delete user session', 'data' => null));
         } else {
             return json_encode(array('status' => 201, 'message' => 'Failed, token invalid', 'data' => null));
@@ -104,9 +99,7 @@ class UserController extends Controller {
     }
 
     public function is_logged_in(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
             return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => array('logged_in' => true)));
         } else {
             return json_encode(array('status' => 200, 'message' => 'youre not in logged in session', 'data' => array('logged_in' => false)));
@@ -114,12 +107,10 @@ class UserController extends Controller {
     }
 
     public function get_user_details(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            $user = Tbl_users::find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'id' => '="' . $user_token->user_id . '"'))));
-            $group_user = Tbl_user_groups::find('first', array('fields' => 'all', 'table_name' => 'tbl_user_groups', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.user_id' => '="' . $user_token->user_id . '"'))));
-            $group = Tbl_groups::find('first', array('fields' => 'all', 'table_name' => 'tbl_groups', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.id' => '="' . $group_user->group_id . '"'))));
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $user = DB::table('tbl_users')->where('is_active', 1)->where('id', $this->user_token->user_id)->first();
+            $group_user = DB::table('tbl_user_groups')->where('is_active', 1)->where('user_id', $this->user_token->user_id)->first();
+            $group = DB::table('tbl_groups')->where('is_active', 1)->where('id', $group_user->group_id)->first();
             $res = array(
                 'id' => $user->id,
                 'username' => $user->username,
@@ -138,11 +129,15 @@ class UserController extends Controller {
     }
 
     public function get_user_permissions(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            $user_group = Tbl_user_groups::find('first', array('fields' => 'all', 'table_name' => 'tbl_user_groups', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.user_id' => '="' . $user_token->user_id . '"'))));
-            $res = Tbl_group_permissions::query("SELECT * FROM `tbl_group_permissions` a LEFT JOIN tbl_permissions b ON a.permission_id = b.id WHERE a.group_id = '" . $user_group->group_id . "' ORDER BY b.module ASC");
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $user_group = DB::table('tbl_user_groups')->where('is_active', 1)->where('user_id', $this->user_token->user_id)->first();
+            $res = DB::table('tbl_group_permissions AS a')
+                    ->select('a.*')
+                    ->where('a.is_active', 1)
+                    ->Where('a.group_id', $user_group->group_id)
+                    ->leftJoin('tbl_permissions AS b', 'b.id', '=', 'a.permission_id')
+                    ->orderBy('b.module', 'asc')
+                    ->get();
             return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
         } else {
             return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
@@ -150,19 +145,34 @@ class UserController extends Controller {
     }
 
     public function verify_password(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => null));
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $password = base64_decode($request->input('password'));
+            $user = DB::table('tbl_users')->where('is_active', 1)->where('id', $this->user_token->user_id)->first();
+            $verify_password = Auth::verify_hash($password, $user->password);
+            if ($verify_password) {
+                return json_encode(array('status' => 200, 'message' => 'you are password is correct', 'valid' => $verify_password));
+            } else {
+                return json_encode(array('status' => 201, 'message' => 'Your password is not matched to any our database.', 'data' => null));
+            }
         } else {
             return json_encode(array('status' => 201, 'message' => 'youre not in logged in session', 'data' => null));
         }
     }
 
+    public function change_password(Request $request) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $old_pass = base64_decode($request->input('new_password'));
+            $news_pass = password_hash($old_pass, PASSWORD_DEFAULT);
+            $user = DB::table('tbl_users')->where('is_active', 1)->where('id', $this->user_token->user_id)->first();
+            DB::table('tbl_users')->where('id', $this->user_token->user_id)->update(['password' => $news_pass]);
+            return json_encode(array('status' => 200, 'message' => 'Successfully change password user', 'data' => array('id' => $this->user_token->user_id, 'email' => $user->email)));
+        } else {
+            return json_encode(array('status' => 201, 'message' => 'Failed, token invalid', 'data' => null));
+        }
+    }
+
     public function get_latest_activity(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first(); //$Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
             $data = array(
                 array(
                     'ini hanya data dummy 1'

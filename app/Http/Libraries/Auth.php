@@ -13,11 +13,6 @@ use App\Http\Libraries\Auth;
 use App\Http\Libraries\Session_Library AS SesLibrary;
 //load model data
 use App\Model\Tbl_user_tokens;
-use App\Model\Tbl_users;
-use App\Model\Tbl_permissions;
-use App\Model\Tbl_group_permissions;
-use App\Model\Tbl_user_devices;
-use App\Model\Tbl_user_logged_in;
 //use DB;
 use Illuminate\Support\Facades\DB;
 
@@ -42,7 +37,6 @@ class Auth {
     public static function validate_password($data = null) {
         $return = json_encode(array('status' => 204, 'message' => 'empty data!!!'));
         if ($data != null) {
-            $Tbl_users = new Tbl_users();
             if (isset($data['email']) && !empty($data['email'])) {
                 $user_exist = DB::table('tbl_users')->where('email', $data['email'])->first(); //$Tbl_users->find('first', array('fields' => 'all', 'table_name' => 'tbl_users', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.email' => '="' . $data['email'] . '"'))));
             } else {
@@ -52,8 +46,8 @@ class Auth {
             if ($res == true) {
                 $token = Auth::generate_api_token($user_exist);
                 if ($token['status'] == 200) {
-                    $Tbl_user_tokens = new Tbl_user_tokens();
-                    $generated_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token['data']->token_generated)->first(); //$Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.token_generated' => '="' . $token['data']->token_generated . '"'))));
+                    $generated_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token['data']->token_generated)->first();
+                    DB::table('tbl_user_tokens ')->where('user_id', $user_exist->id)->update(['is_guest' => 0]);
                     $return = json_encode(array('status' => 200, 'message' => 'success generate token', 'data' => array('token' => $generated_token->token_generated)));
                 } else {
                     $return = json_encode(array('status' => 202, 'message' => 'generate token failed'));
@@ -81,53 +75,19 @@ class Auth {
                 $id = $data->id;
             }
             //update is_logged_in table user
-            $Tbl_users = new Tbl_users();
-            $Tbl_users->update(['is_logged_in' => 0], $id);
-            //DB::table('tbl_users')->where('id', $data->id)->update(['is_logged_in' => 0]);
-            $Tbl_user_logged_in = new Tbl_user_logged_in();
-            $Tbl_user_logged_in->update_by(['logged_in' => 0], $id, 'user_id');
-            //DB::table('tbl_user_logged_in')->where('user_token_id', $data->id)->update(['logged_in' => 0]);
-            //delete from actual table 
-            $Tbl_user_tokens = new Tbl_user_tokens();
-            $Tbl_user_tokens->delete_by($id, 'user_id');
-            //DB::table('tbl_user_tokens')->delete()->where('user_id', '=', $data->user_id)->delete();
-            return true;
-        }
-    }
+            DB::table('tbl_users')->where('id', $id)->update(['is_logged_in' => 0]);
 
-    public static function generate_global_token($data = null) {
-        if ($data != null) {
-            debug($data);
-            $Tbl_user_devices = new Tbl_user_devices();
-            $user_device_exist = $Tbl_user_devices->find('all', array(
-                'fields' => 'all',
-                'table_name' => 'tbl_user_devices',
-                'conditions' => array(
-                    'where' => array(
-                        'a.is_active' => '= "1"',
-                        'a.user_id' => '="' . $data->id . '"'
-                    )
-                )
-                    )
-            );
-            debug($user_device_exist);
+            DB::table('tbl_user_logged_in ')->where('user_id', $id)->update(['logged_in' => 0]);
+
+            DB::table('tbl_user_tokens')->where('user_id', $id)->delete();
+
+            return true;
         }
     }
 
     public static function generate_api_token($data = array()) {
         if ($data) {
-            $Tbl_user_devices = new Tbl_user_devices();
-            $user_device_exist = $Tbl_user_devices->find('all', array(
-                'fields' => 'all',
-                'table_name' => 'tbl_user_devices',
-                'conditions' => array(
-                    'where' => array(
-                        'a.is_active' => '= "1"',
-                        'a.user_id' => '="' . $data->id . '"'
-                    )
-                )
-                    )
-            );
+            $user_device_exist = DB::table('tbl_user_devices AS a')->select('a.*')->where('a.is_active', 1)->Where('a.user_id', $data->id)->get();
             if ($user_device_exist == null) {
                 $user_device = DB::table('tbl_user_devices')->insertGetId(
                         [
@@ -220,17 +180,7 @@ class Auth {
             }
             $res_user_tokens = array('status' => 201, 'message' => 'failed generated token', 'data' => 'null');
             if ($user_token) {
-                $Tbl_user_tokens = new Tbl_user_tokens();
-                $res_data = $Tbl_user_tokens->find('first', array(
-                    'fields' => 'all',
-                    'table_name' => 'tbl_user_tokens',
-                    'conditions' => array(
-                        'where' => array(
-                            'a.id' => '="' . $user_token . '"'
-                        )
-                    )
-                        )
-                );
+                $res_data = DB::table('tbl_user_tokens AS a')->select('a.*')->where('a.is_active', 1)->Where('a.id', $user_token)->get();
                 $res_user_tokens = array('status' => 200, 'message' => 'succesfully generated token', 'data' => $res_data);
             }
             return $res_user_tokens;
@@ -239,8 +189,7 @@ class Auth {
 
     public static function verify_group_permission($route = null) {
         $return = array();
-        $Tbl_permissions = new Tbl_permissions();
-        $permission = $Tbl_permissions->find('first', array('fields' => 'all', 'table_name' => 'tbl_permissions', 'conditions' => array('like' => array('a.route' => '%' . $route . '%'))));
+        $permission = DB::table('tbl_permissions')->where('is_active', 1)->where('route', 'like', '%' . $route . '%')->first();
         if ($permission == null) {
             $return = array(
                 'status' => 200,
@@ -252,8 +201,7 @@ class Auth {
             );
             return $return;
         }
-        $Tbl_group_permissions = new Tbl_group_permissions();
-        $group_permission = $Tbl_group_permissions->find('first', array('fields' => 'all', 'table_name' => 'tbl_group_permissions', 'conditions' => array('where' => array('a.is_active' => '= "1"', 'a.permission_id' => '= "' . $permission->id . '"'))));
+        $group_permission = DB::table('tbl_group_permissions')->where('is_active', 1)->where('permission_id', $permission->id)->first();
         if ($group_permission == null) {
             $return = array(
                 'status' => 200,
@@ -373,17 +321,8 @@ class Auth {
                 ]
         );
         $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_tokens_exist = $Tbl_user_tokens->find('first', array(
-            'fields' => 'all',
-            'table_name' => 'tbl_user_tokens',
-            'conditions' => array(
-                'where' => array(
-                    'a.is_active' => '= 1',
-                    'a.id' => '="' . $access_token . '"'
-                )
-            )
-                )
-        );
+
+        $user_tokens_exist = DB::table('tbl_user_tokens')->where('is_active', 1)->where('id', $access_token)->first();
         return $user_tokens_exist;
     }
 

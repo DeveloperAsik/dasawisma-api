@@ -24,10 +24,13 @@ class Controller extends BaseController {
     public function __construct(Request $request) {
         $this->initVar();
         $this->initAuth();
-
         if ($request->input('token')) {
             $user_token = DB::table('tbl_user_tokens AS a')->select('a.*')->where('a.is_active', 1)->Where('a.token_generated', 'like', '%' . $request->input('token') . '%')->get();
             if (isset($user_token[0]->token_generated) && !empty($user_token[0]->token_generated)) {
+                $this->user_token = new \stdClass();
+                foreach ($user_token[0] AS $key => $values) {
+                    $this->user_token->{$key} = $values;
+                }
                 return json_encode(array('status' => 200, 'message' => 'your token is valid', 'data' => array('valid' => true)));
             } else {
                 return json_encode(array('status' => 200, 'message' => 'your token is not valid', 'data' => array('valid' => false)));
