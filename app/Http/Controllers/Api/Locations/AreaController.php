@@ -11,8 +11,6 @@ namespace App\Http\Controllers\Api\Locations;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Model\Tbl_user_tokens;
-use App\Model\Tbl_a_areas;
 
 /**
  * Description of AreaController
@@ -25,26 +23,26 @@ class AreaController extends Controller {
 
 
     public function get_list(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            $Tbl_a_areas = new Tbl_a_areas();
+        if (isset($this->user_token) && !empty($this->user_token)) {
             $offset = $request->input('page') - 1;
-            $where = array('a.is_active' => '="1"');
-            $conditions = array();
-            if ($request->input('keyword')) {
-                $conditions = array_merge($where, array('a.name' => 'like "%' . $request->input('keyword') . '%"'));
+            $value = $request->input('value');
+            $keyword = $request->input('keyword');
+            if ($keyword == 'name') {
+                $key = 'a.name';
+                $val = '%' . $value . '%';
+                $opt = 'like';
+            } elseif ($keyword == 'id') {
+                $key = 'a.id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'sub_district') {
+                $key = 'a.sub_district_id';
+                $val = $value;
+                $opt = '=';
+            } else {
+                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
-            $res = $Tbl_a_areas->find('all', array(
-                'fields' => 'all',
-                'table_name' => 'tbl_a_areas',
-                'conditions' => array('where' => $conditions),
-                'limit' => array(
-                    'offset' => $offset,
-                    'perpage' => $request->input('total')
-                )
-                    )
-            );
+            $res = DB::table('tbl_a_areas AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
             if (isset($res) && !empty($res) && $res != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
             } else {
@@ -55,25 +53,20 @@ class AreaController extends Controller {
         }
     }
 
-    public function find() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            if (isset($post) && !empty($post)) {
-                $id = base64_decode($post['id']);
-                $Tbl_a_areas = new Tbl_a_areas();
-                $res = $Tbl_a_areas->find('all', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $id . '"'))));
-                if (isset($res) && !empty($res) && $res != null) {
-                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
-                } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, or data not found', 'data' => null));
-                }
-            }
-        } else {
-            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
-        }
+    public function insert() {
+        
+    }
+
+    public function update() {
+        
+    }
+
+    public function delete() {
+        
+    }
+
+    public function remove() {
+        
     }
 
 }

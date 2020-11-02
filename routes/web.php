@@ -3,15 +3,15 @@
 use Illuminate\Support\Facades\Route;
 
 /*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+  |--------------------------------------------------------------------------
+  | API Routes
+  |--------------------------------------------------------------------------
+  |
+  | Here is where you can register API routes for your application. These
+  | routes are loaded by the RouteServiceProvider within a group which
+  | is assigned the "api" middleware group. Enjoy building your API!
+  |
+ */
 Route::get('/', 'Api\Settings\UserController@index')->name('/');
 
 Route::get('/generate-token-access', 'Api\Settings\UserController@generate_token_access')->name('generate-token-access');
@@ -49,11 +49,22 @@ Route::post('/transmit/report-incidents', 'Api\Reports\IncidentsController@inser
 
 Route::get('/latest/activity', 'Api\Settings\UserController@get_latest_activity')->name('get-latest-activity');
 
-Route::get('/fetch/citizen/{key}', 'Api\Master\CitizenController@get_list')->name('get-list-citizen');
-Route::get('/fetch/family/', 'Api\Master\FamilyController@get_list')->name('get-list-family');
+//fetching citizen
+Route::get('/fetch/citizen', 'Api\Master\CitizenController@get_list')->name('get-list-citizen');
+
+//fetching children
 Route::get('/fetch/children', 'Api\Master\ChildrenController@get_list')->name('get-list-children');
 
-////fetching data location
+/*
+ * fetching data family
+ */
+Route::get('/fetch/family', 'Api\Master\FamilyController@get_list')->name('get-list-family');
+Route::get('/fetch/person-details', 'Api\Master\FamilyController@get_person_details')->name('get-person-details');
+Route::post('/transmit/family', 'Api\Master\FamilyController@insert')->name('transmit-family');
+
+/*
+ * fetching data location
+ */
 Route::get('/fetch/countries', 'Api\Locations\CountryController@get_list')->name('get-list-country');
 //Route::post('/fetch/countries', 'Api\Locations\CountryController@find')->name('get-country');
 //
@@ -67,7 +78,7 @@ Route::get('/fetch/sub-districts', 'Api\Locations\SubDistrictController@get_list
 //Route::post('/fetch/sub-districts', 'Api\Locations\SubDistrictController@find')->name('get-sub-district');
 //
 Route::get('/fetch/areas', 'Api\Locations\AreaController@get_list')->name('get-list-area');
-//Route::post('/fetch/areas', 'Api\Locations\AreaController@find')->name('get-area');
+Route::post('/find/areas', 'Api\Locations\AreaController@find')->name('find-area');
 //
 Route::get('/fetch/report-types', 'Api\Reports\TypesController@get_list')->name('get-list-report-types');
 //Route::post('/fetch/report-types', 'Api\Reports\TypesController@find')->name('get-report-types');
@@ -92,7 +103,6 @@ Route::get('/fetch/report-level', 'Api\Reports\LevelController@get_list')->name(
 //Route::post('/fetch/family-properties', 'Api\Master\PropertyController@find')->name('get-property');
 //Route::post('/transmit/family-property', 'Api\Master\PropertyController@insert')->name('transmit-property');
 //
-
 ////fetching data volunteer
 //Route::get('/fetch/volunteer/', 'Api\Locations\VolunteerController@get_list')->name('get-list-volunteer');
 //

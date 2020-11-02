@@ -21,15 +21,34 @@ class CitizenController extends Controller {
 
     //put your code here
 
-    public function get_list($keyword = 'all', Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
+    public function get_list(Request $request) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
             $offset = $request->input('page') - 1;
-            if ($keyword == 'all') {
-                $result = DB::table('tbl_b_parents')->select('tbl_b_parents.*')->where('tbl_b_parents.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+            $value = $request->input('value');
+            $keyword = $request->input('keyword');
+            if ($keyword == 'name') {
+                $key = 'a.name';
+                $val = '%' . $value . '%';
+                $opt = 'like';
+            } elseif ($keyword == 'id') {
+                $key = 'a.id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'type') {
+                $key = 'a.sex';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'all') {
+                $key = '';
+                $val = '';
+                $opt = '=';
             } else {
-                $result = DB::table('tbl_b_parents')->select('tbl_b_parents.*')->where('tbl_b_parents.is_active', 1)->where('sex', $keyword)->limit($request->input('total'))->offset($offset)->get();
+                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+            }
+            if ($keyword == 'all') {
+                $result = DB::table('tbl_b_parents AS a')->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+            } else {
+                $result = DB::table('tbl_b_parents AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
             }
             if ($result) {
                 return json_encode(array('status' => 200, 'message' => 'Success fetching data citizen', 'data' => $result));

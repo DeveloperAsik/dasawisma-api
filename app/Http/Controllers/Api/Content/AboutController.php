@@ -10,8 +10,8 @@ namespace App\Http\Controllers\Api\Content;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Model\Tbl_user_tokens;
-use App\Model\Tbl_abouts;
+//load DB class
+use Illuminate\Support\Facades\DB;
 
 /**
  * Description of AboutController
@@ -24,21 +24,8 @@ class AboutController extends Controller {
 
 
     public function get_list(Request $request) {
-        $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '= 1', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
-            $Tbl_abouts = new Tbl_abouts();
-            $data = $Tbl_abouts->find('first', array(
-                'fields' => '*',
-                'table_name' => 'tbl_abouts',
-                'conditions' => array(
-                    'where' => array(
-                        'a.is_active' => '="1"'
-                    )
-                )
-                    )
-            );
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $data = DB::table('tbl_abouts')->where('is_active', 1)->first();
             if (isset($data) && !empty($data) && $data != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $data));
             } else {
@@ -47,6 +34,22 @@ class AboutController extends Controller {
         } else {
             return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, token not match', 'data' => null));
         }
+    }
+
+    public function insert() {
+        
+    }
+
+    public function update() {
+        
+    }
+
+    public function delete() {
+        
+    }
+
+    public function remove() {
+        
     }
 
 }

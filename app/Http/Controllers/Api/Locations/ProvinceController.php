@@ -22,26 +22,24 @@ class ProvinceController extends Controller {
 
     //put your code here
     public function get_list(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            $Tbl_a_provinces = new Tbl_a_provinces();
+        if (isset($this->user_token) && !empty($this->user_token)) {
             $offset = $request->input('page') - 1;
-            $where = array('a.is_active' => '="1"');
-            $conditions = array();
-            if ($request->input('keyword')) {
-                $conditions = array_merge($where, array('a.name' => 'like "%' . $request->input('keyword') . '%"'));
+            $value = $request->input('value');
+            $keyword = $request->input('keyword');
+            if ($keyword == 'name') {
+                $key = 'a.name';
+                $val = '%' . $value . '%';
+                $opt = 'like';
+            } elseif ($keyword == 'id') {
+                $key = 'a.id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'country_id') {
+                $key = 'a.country_id ';
+                $val = $value;
+                $opt = '=';
             }
-            $res = $Tbl_a_provinces->find('all', array(
-                'fields' => 'all',
-                'table_name' => 'tbl_a_provinces',
-                'conditions' => array('where' => $conditions),
-                'limit' => array(
-                    'offset' => $offset,
-                    'perpage' => $request->input('total')
-                )
-                    )
-            );
+            $res = DB::table('tbl_a_provinces AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
             if (isset($res) && !empty($res) && $res != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
             } else {

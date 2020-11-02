@@ -12,7 +12,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Libraries\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
 use App\Model\Tbl_user_tokens;
 use App\Model\Tbl_b_familes;
 use App\Model\Tbl_a_countries;
@@ -36,79 +35,93 @@ class FamilyController extends Controller {
 
 
     public function get_list(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            $Tbl_b_familes = new Tbl_b_familes();
-            $family = $Tbl_b_familes->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_familes', 'conditions' => array('where' => array('a.is_active' => '="1"'))));
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $offset = $request->input('page') - 1;
+            $value = $request->input('value');
+            $keyword = $request->input('keyword');
+            if ($keyword == 'name') {
+                $key = 'a.name';
+                $val = '%' . $value . '%';
+                $opt = 'like';
+            } elseif ($keyword == 'id') {
+                $key = 'a.id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'head_of_family_id') {
+                $key = 'a.head_of_family_id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'spouse_id') {
+                $key = 'a.spouse_id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'district_id ') {
+                $key = 'a.district_id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'sub_district_id') {
+                $key = 'a.sub_district_id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'area_id') {
+                $key = 'a.area_id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'all') {
+                $key = '';
+                $val = '';
+                $opt = '';
+            } else {
+                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+            }
+            if ($keyword == 'all') {
+                $family = DB::table('tbl_b_familes AS a')->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+            } else {
+                $family = DB::table('tbl_b_familes AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
+            }
+            $arr_families = array();
             if (isset($family) && !empty($family) && $family != null) {
-                $arr_families = array();
                 foreach ($family AS $key => $values) {
-                    //location
-                    if ($values->country_id) {
-                        $Tbl_a_countries = new Tbl_a_countries();
-                        $country = $Tbl_a_countries->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $values->country_id . '"'))));
-                    }
-                    if ($values->province_id) {
-                        $Tbl_a_provinces = new Tbl_a_provinces();
-                        $province = $Tbl_a_provinces->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_provinces', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $values->province_id . '"'))));
-                    }
-                    if ($values->district_id) {
-                        $Tbl_a_districts = new Tbl_a_districts();
-                        $district = $Tbl_a_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $values->district_id . '"'))));
-                    }
-                    if ($values->sub_district_id) {
-                        $Tbl_a_sub_districts = new Tbl_a_sub_districts();
-                        $sub_district = $Tbl_a_sub_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_sub_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $values->sub_district_id . '"'))));
-                    }
-                    if ($values->area_id) {
-                        $Tbl_a_areas = new Tbl_a_areas();
-                        $area = $Tbl_a_areas->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $values->area_id . '"'))));
-                    }
-                    //parent 
-                    $Tbl_b_parents = new Tbl_b_parents();
-                    $Tbl_b_legal_id_numbers = new Tbl_b_legal_id_numbers();
+                    //retrieve all location
+                    $country = DB::table('tbl_a_countries AS a')->where('a.is_active', 1)->where('a.id', $values->country_id)->first();
+                    $province = DB::table('tbl_a_provinces AS a')->where('a.is_active', 1)->where('a.id', $values->province_id)->first();
+                    $district = DB::table('tbl_a_districts AS a')->where('a.is_active', 1)->where('a.id', $values->district_id)->first();
+                    $sub_district = DB::table('tbl_a_sub_districts AS a')->where('a.is_active', 1)->where('a.id', $values->sub_district_id)->first();
+                    $area = DB::table('tbl_a_areas AS a')->where('a.is_active', 1)->where('a.id', $values->area_id)->first();
+                    //fetch father
                     $father = null;
                     $arr_id_card_father = array();
                     if ($values->head_of_family_id) {
-                        $father = $Tbl_b_parents->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_parents', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $values->head_of_family_id . '"'))));
-
-                        //fetch all id
-                        $id_card_father = $Tbl_b_legal_id_numbers->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_legal_id_numbers', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.person_id' => '="' . $father->id . '"'))));
+                        $father = DB::table('tbl_b_parents AS a')->where('a.is_active', 1)->where('a.id', $values->head_of_family_id)->first();
+                        $id_card_father = DB::table('tbl_b_legal_id_numbers AS a')->where('a.is_active', 1)->where('a.person_id', $father->id)->first();
                         if ($id_card_father) {
-                            foreach ($id_card_father AS $y => $vl) {
-                                $arr_id_card_father[] = array(
-                                    'id' => $vl->id,
-                                    'id_number' => $vl->code,
-                                    'id_name' => $vl->name,
-                                );
-                            }
+                            $arr_id_card_father[] = array(
+                                'id' => $id_card_father->id,
+                                'id_number' => $id_card_father->code,
+                                'id_name' => $id_card_father->name,
+                            );
                         }
                     }
+                    //fetch mother
                     $mother = null;
                     $arr_id_card_mother = array();
                     if ($values->spouse_id) {
-                        $mother = $Tbl_b_parents->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_parents', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $values->spouse_id . '"'))));
-                        //fetch all id
-                        $id_card_mother = $Tbl_b_legal_id_numbers->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_legal_id_numbers', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.person_id' => '="' . $mother->id . '"'))));
+                        $mother = DB::table('tbl_b_parents AS a')->where('a.is_active', 1)->where('a.id', $values->spouse_id)->first();
+                        $id_card_mother = DB::table('tbl_b_legal_id_numbers AS a')->where('a.is_active', 1)->where('a.person_id', $mother->id)->first();
                         if ($id_card_mother) {
-                            foreach ($id_card_mother AS $y => $vl) {
-                                $id_card_mother[] = array(
-                                    'id' => $vl->id,
-                                    'id_number' => $vl->code,
-                                    'id_name' => $vl->name,
-                                );
-                            }
+                            $arr_id_card_mother[] = array(
+                                'id' => $id_card_mother->id,
+                                'id_number' => $id_card_mother->code,
+                                'id_name' => $id_card_mother->name,
+                            );
                         }
                     }
-                    //child list
-                    $Tbl_b_family_childs = new Tbl_b_family_childs();
-                    $family_childs = $Tbl_b_family_childs->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_family_childs', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.family_id' => '="' . $values->id . '"'))));
+                    //fetch childs
+                    $childs = DB::table('tbl_b_family_childs AS a')->where('a.is_active', 1)->where('a.family_id', $values->id)->get();
                     $arr_child = array();
-                    if ($family_childs) {
-                        foreach ($family_childs AS $k => $v) {
-                            $Tbl_b_childrens = new Tbl_b_childrens();
-                            $childrens = $Tbl_b_childrens->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_childrens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $v->child_id . '"'))));
+                    if ($childs) {
+                        foreach ($childs AS $k => $v) {
+                            $childrens = DB::table('tbl_b_childrens AS a')->where('a.is_active', 1)->where('a.id', $v->child_id)->first();
                             $arr_child[] = array(
                                 'id' => $childrens->id,
                                 'code' => $childrens->code,
@@ -148,11 +161,9 @@ class FamilyController extends Controller {
                         'childs' => $arr_child
                     );
                 }
-                $res = $arr_families;
             }
-
-            if (isset($res) && !empty($res) && $res != null) {
-                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
+            if (isset($arr_families) && !empty($arr_families) && $arr_families != null) {
+                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $arr_families));
             } else {
                 return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
             }
@@ -161,163 +172,34 @@ class FamilyController extends Controller {
         }
     }
 
-    public function find(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            if (isset($post) && !empty($post)) {
-                $id = base64_decode($post['id']);
-                $Tbl_b_familes = new Tbl_b_familes();
-                $family = $Tbl_b_familes->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_familes', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $id . '"'))));
-                $res = array();
-                if (isset($family) && !empty($family) && $family != null) {
-                    //location
-                    if ($family->country_id) {
-                        $Tbl_a_countries = new Tbl_a_countries();
-                        $country = $Tbl_a_countries->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $family->country_id . '"'))));
-                    }
-                    if ($family->province_id) {
-                        $Tbl_a_provinces = new Tbl_a_provinces();
-                        $province = $Tbl_a_provinces->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_provinces', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $family->province_id . '"'))));
-                    }
-                    if ($family->district_id) {
-                        $Tbl_a_districts = new Tbl_a_districts();
-                        $district = $Tbl_a_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $family->district_id . '"'))));
-                    }
-                    if ($family->sub_district_id) {
-                        $Tbl_a_sub_districts = new Tbl_a_sub_districts();
-                        $sub_district = $Tbl_a_sub_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_sub_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $family->sub_district_id . '"'))));
-                    }
-                    if ($family->area_id) {
-                        $Tbl_a_areas = new Tbl_a_areas();
-                        $area = $Tbl_a_areas->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $family->area_id . '"'))));
-                    }
-                    //parent 
-                    $Tbl_b_parents = new Tbl_b_parents();
-                    $Tbl_b_legal_id_numbers = new Tbl_b_legal_id_numbers();
-                    $father = null;
-                    $arr_id_card_father = array();
-                    if ($family->head_of_family_id) {
-                        $father = $Tbl_b_parents->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_parents', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $family->head_of_family_id . '"'))));
-
-                        //fetch all id
-                        $id_card_father = $Tbl_b_legal_id_numbers->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_legal_id_numbers', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.person_id' => '="' . $father->id . '"'))));
-                        if ($id_card_father) {
-                            foreach ($id_card_father AS $y => $vl) {
-                                $arr_id_card_father[] = array(
-                                    'id' => $vl->id,
-                                    'id_number' => $vl->code,
-                                    'id_name' => $vl->name,
-                                );
-                            }
-                        }
-                    }
-                    $mother = null;
-                    $arr_id_card_mother = array();
-                    if ($family->spouse_id) {
-                        $mother = $Tbl_b_parents->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_parents', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $family->spouse_id . '"'))));
-                        //fetch all id
-                        $id_card_mother = $Tbl_b_legal_id_numbers->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_legal_id_numbers', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.person_id' => '="' . $mother->id . '"'))));
-                        if ($id_card_mother) {
-                            foreach ($id_card_mother AS $y => $vl) {
-                                $id_card_mother[] = array(
-                                    'id' => $vl->id,
-                                    'id_number' => $vl->code,
-                                    'id_name' => $vl->name,
-                                );
-                            }
-                        }
-                    }
-                    //child list
-                    $Tbl_b_family_childs = new Tbl_b_family_childs();
-                    $family_childs = $Tbl_b_family_childs->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_family_childs', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.family_id' => '="' . $family->id . '"'))));
-                    $arr_child = array();
-                    if ($family_childs) {
-                        foreach ($family_childs AS $k => $v) {
-                            $Tbl_b_childrens = new Tbl_b_childrens();
-                            $childrens = $Tbl_b_childrens->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_childrens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $v->child_id . '"'))));
-                            $arr_child[] = array(
-                                'id' => $childrens->id,
-                                'code' => $childrens->code,
-                                'fname' => $childrens->first_name,
-                                'lname' => $childrens->last_name,
-                                'birth_place' => $childrens->birth_place,
-                                'birth_date' => $childrens->birth_date,
-                                'blood_type' => $childrens->blood_type,
-                            );
-                        }
-                    }
-                    $res = array(
-                        'id' => $family->id,
-                        'address' => $family->address,
-                        'country_id' => $country->id,
-                        'country_name' => $country->name,
-                        'province_id' => $province->id,
-                        'province_name' => $province->name,
-                        'district_id' => $district->id,
-                        'district_name' => $district->name,
-                        'sub_district_id' => $sub_district->id,
-                        'sub_district_name' => $sub_district->name,
-                        'area_id' => $area->id,
-                        'area_name' => $area->name,
-                        'parent' => array(
-                            array(
-                                'father_id' => $father->id,
-                                'father_name' => $father->first_name . ' ' . $father->last_name,
-                                'id_details' => $arr_id_card_father
-                            ),
-                            array(
-                                'mother_id' => $mother->id,
-                                'mother_name' => $mother->first_name . ' ' . $mother->last_name,
-                                'id_details' => $arr_id_card_mother
-                            )
-                        ),
-                        'childs' => $arr_child
-                    );
-                }
-                if (isset($res) && !empty($res) && $res != null) {
-                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
-                } else {
-                    return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
-                }
-            }
-        } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
-        }
-    }
-
     public function get_person_details(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            $arr_person = array();
-            if (isset($post) && !empty($post)) {
-                $person_id = $post['id'];
-                $Tbl_b_parents = new Tbl_b_parents();
-                $person = $Tbl_b_parents->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_parents', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $person_id . '"'))));
-                //fetch all id
-                $id_card_father = $Tbl_b_legal_id_numbers->find('all', array('fields' => 'all', 'table_name' => 'tbl_b_legal_id_numbers', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.person_id' => '="' . $person_id . '"'))));
-                if ($id_card_father) {
-                    foreach ($id_card_father AS $y => $vl) {
-                        $arr_id_card_father[] = array(
-                            'id' => $vl->id,
-                            'id_number' => $vl->code,
-                            'id_name' => $vl->name,
-                        );
-                    }
-                }
-                $arr_person = array(
-                    'id' => $father->id,
-                    'name' => $father->first_name . ' ' . $father->last_name,
-                    'id_details' => $arr_id_card_father
-                );
-
-                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $arr_person));
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $value = $request->input('value');
+            $keyword = $request->input('keyword');
+            if ($keyword == 'name') {
+                $key = 'a.name';
+                $val = '%' . $value . '%';
+                $opt = 'like';
+            } elseif ($keyword == 'id') {
+                $key = 'a.id';
+                $val = $value;
+                $opt = '=';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, post data empty', 'data' => null));
+                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
+            $person = DB::table('tbl_b_parents AS a')->where('a.is_active', 1)->where($key, $opt, $val)->first();
+            $arr_person = array();
+            if ($person) {
+                $id_card = DB::table('tbl_b_legal_id_numbers AS a')->where('a.is_active', 1)->where('a.person_id', $person->id)->first();
+                $arr_person = array(
+                    'id' => $person->id,
+                    'name' => $person->first_name . ' ' . $person->last_name,
+                    'id_details' => $id_card
+                );
+            }
+            return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $arr_person));
+        } else {
+            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, post data empty', 'data' => null));
         }
     }
 
@@ -355,7 +237,7 @@ class FamilyController extends Controller {
                         "created_by" => $user_token->user_id,
                         "created_date" => Tools::getDateNow()
                     );
-                    
+
                     $family = $Tbl_b_familes->insert_return_id($arr_insert);
                     if ($family) {
                         return json_encode(array('status' => 200, 'message' => 'Success transmit data into db', 'data' => array('id' => $family)));
