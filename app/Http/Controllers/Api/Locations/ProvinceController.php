@@ -38,8 +38,16 @@ class ProvinceController extends Controller {
                 $key = 'a.country_id ';
                 $val = $value;
                 $opt = '=';
+            } elseif ($keyword == 'all') {
+                $key = '';
+                $val = '';
+                $opt = '';
             }
-            $res = DB::table('tbl_a_provinces AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
+            if ($keyword == 'all') {
+                $res = DB::table('tbl_a_provinces AS a')->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+            } else {
+                $res = DB::table('tbl_a_provinces AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
+            }
             if (isset($res) && !empty($res) && $res != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
             } else {
