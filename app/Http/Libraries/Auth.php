@@ -46,8 +46,8 @@ class Auth {
             if ($res == true) {
                 $token = Auth::generate_api_token($user_exist);
                 if ($token['status'] == 200) {
-                    $generated_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token['data']->token_generated)->first();
-                    DB::table('tbl_user_tokens ')->where('user_id', $user_exist->id)->update(['is_guest' => 0]);
+                    $generated_token = DB::table('tbl_user_tokens AS a')->where('a.is_active', 1)->where('a.token_generated', $token['data'][0]->token_generated)->first();
+                    DB::table('tbl_user_tokens AS a')->where('a.user_id', $user_exist->id)->update(['a.is_guest' => 0]);
                     $return = json_encode(array('status' => 200, 'message' => 'success generate token', 'data' => array('token' => $generated_token->token_generated)));
                 } else {
                     $return = json_encode(array('status' => 202, 'message' => 'generate token failed'));

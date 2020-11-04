@@ -10,11 +10,9 @@ namespace App\Http\Controllers\Api\Settings;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 //load custom class
 use App\Http\Libraries\Auth;
 use App\Http\Libraries\Tools_Library;
-
 //load DB class
 use Illuminate\Support\Facades\DB;
 
@@ -100,7 +98,11 @@ class UserController extends Controller {
 
     public function is_logged_in(Request $request) {
         if (isset($this->user_token) && !empty($this->user_token)) {
-            return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => array('logged_in' => true)));
+            if ($this->user_token->user_id != 0 && $this->user_token->is_guest == 0) {
+                return json_encode(array('status' => 200, 'message' => 'youre in logged in session', 'data' => array('logged_in' => true)));
+            } else {
+                return json_encode(array('status' => 200, 'message' => 'youre not in logged in session', 'data' => array('logged_in' => false)));
+            }
         } else {
             return json_encode(array('status' => 200, 'message' => 'youre not in logged in session', 'data' => array('logged_in' => false)));
         }
