@@ -9,18 +9,20 @@
 namespace App\Http\Controllers\Api\Locations;
 
 use App\Http\Controllers\Controller;
-use App\Model\Tbl_a_provinces;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 /**
- * Description of ProvinceController
+  /**
+ * Description of IspController
  *
  * @author root
  */
-class ProvinceController extends Controller {
+class IspController extends Controller {
 
     //put your code here
+
+
     public function get_list(Request $request) {
         if (isset($this->user_token) && !empty($this->user_token)) {
             $offset = $request->input('page') - 1;
@@ -38,15 +40,31 @@ class ProvinceController extends Controller {
                 $key = 'a.country_id';
                 $val = $value;
                 $opt = '=';
+            } elseif ($keyword == 'province_id') {
+                $key = 'a.province_id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'district_id') {
+                $key = 'a.district_id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'sub_district_id') {
+                $key = 'a.sub_district_id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'area_id') {
+                $key = 'a.area_id';
+                $val = $value;
+                $opt = '=';
             } elseif ($keyword == 'all') {
                 $key = '';
                 $val = '';
                 $opt = '';
             }
             if ($keyword == 'all') {
-                $res = DB::table('tbl_a_provinces AS a')->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+                $res = DB::table('tbl_d_integrated_service_posts AS a')->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
             } else {
-                $res = DB::table('tbl_a_provinces AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
+                $res = DB::table('tbl_d_integrated_service_posts AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
             }
             if (isset($res) && !empty($res) && $res != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
@@ -54,8 +72,24 @@ class ProvinceController extends Controller {
                 return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
+    }
+
+    public function insert() {
+        
+    }
+
+    public function update() {
+        
+    }
+
+    public function delete() {
+        
+    }
+
+    public function remove() {
+        
     }
 
 }

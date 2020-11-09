@@ -79,6 +79,9 @@ Route::get('/fetch/sub-districts', 'Api\Locations\SubDistrictController@get_list
 //
 Route::get('/fetch/areas', 'Api\Locations\AreaController@get_list')->name('get-list-area');
 Route::post('/find/areas', 'Api\Locations\AreaController@find')->name('find-area');
+
+//
+Route::get('/fetch/isp', 'Api\Locations\IspController@get_list')->name('get-list-isp');
 //
 Route::get('/fetch/report-types', 'Api\Reports\TypesController@get_list')->name('get-list-report-types');
 //Route::post('/fetch/report-types', 'Api\Reports\TypesController@find')->name('get-report-types');

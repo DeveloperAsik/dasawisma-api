@@ -35,7 +35,7 @@ class DistrictController extends Controller {
                 $val = $value;
                 $opt = '=';
             } elseif ($keyword == 'province_id') {
-                $key = 'a.province_id ';
+                $key = 'a.province_id';
                 $val = $value;
                 $opt = '=';
             } elseif ($keyword == 'all') {

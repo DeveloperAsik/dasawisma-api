@@ -35,7 +35,7 @@ class AreaController extends Controller {
                 $key = 'a.id';
                 $val = $value;
                 $opt = '=';
-            } elseif ($keyword == 'sub_district') {
+            } elseif ($keyword == 'sub_district_id') {
                 $key = 'a.sub_district_id';
                 $val = $value;
                 $opt = '=';

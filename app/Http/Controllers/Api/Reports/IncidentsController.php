@@ -34,23 +34,51 @@ class IncidentsController extends Controller {
 
     //put your code here
     public function get_list(Request $request) {
-        $token = $request->input('token');
-        $user_token = DB::table('tbl_user_tokens')->where('is_active', 1)->where('token_generated', $token)->first();
-        if (isset($user_token) && !empty($user_token)) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
             $offset = $request->input('page') - 1;
-            $report_incidents = DB::table('tbl_c_report_incidents AS a')->select('a.*', 'b.name AS ispName', 'c.name AS report_type_name', 'd.title AS ril_title', 'e.name AS country_name', 'f.name AS provinces_name', 'g.name AS district_name', 'h.name AS sub_district_name', 'i.name AS area_name')
-                            ->where('a.is_active', 1)
-                            ->leftJoin('tbl_d_integrated_service_posts AS b', 'b.id', '=', 'a.integrated_services_post_id')
-                            ->leftJoin('tbl_c_report_types AS c', 'c.id', '=', 'a.type_id')
-                            ->leftJoin('tbl_c_report_incident_levels AS d', 'd.id', '=', 'a.level_id')
-                            ->leftJoin('tbl_a_countries AS e', 'e.id', '=', 'a.country_id')
-                            ->leftJoin('tbl_a_provinces AS f', 'f.id', '=', 'a.province_id')
-                            ->leftJoin('tbl_a_districts AS g', 'g.id', '=', 'a.district_id')
-                            ->leftJoin('tbl_a_sub_districts AS h', 'h.id', '=', 'a.sub_district_id')
-                            ->leftJoin('tbl_a_areas AS i', 'i.id', '=', 'a.area_id')
-                            ->limit($request->input('total'))->offset($offset)->get();
+            $value = $request->input('value');
+            $keyword = $request->input('keyword');
+            if ($keyword == 'title') {
+                $key = 'a.title';
+                $val = '%'.$value.'%';
+                $opt = 'like';
+            } elseif ($keyword == 'id') {
+                $key = 'a.id';
+                $val = "'" . $value . "'";
+                $opt = '=';
+            } elseif ($keyword == 'all') {
+                $key = '';
+                $val = '';
+                $opt = '';
+            }
+            if ($keyword == 'all') {
+                $report_incidents = DB::table('tbl_c_report_incidents AS a')->select('a.id', 'a.title', 'a.description', 'additional_info', 'a.integrated_services_post_id', 'a.type_id', 'a.level_id', 'a.country_id', 'a.province_id', 'a.district_id', 'a.sub_district_id', 'a.area_id', 'a.is_active', 'a.created_by', 'a.created_date', 'b.name AS ispName', 'c.name AS report_type_name', 'd.name AS ril_title', 'e.name AS country_name', 'f.name AS provinces_name', 'g.name AS district_name', 'h.name AS sub_district_name', 'i.name AS area_name')
+                                ->where('a.is_active', 1)
+                                ->leftJoin('tbl_d_integrated_service_posts AS b', 'b.id', '=', 'a.integrated_services_post_id')
+                                ->leftJoin('tbl_c_report_types AS c', 'c.id', '=', 'a.type_id')
+                                ->leftJoin('tbl_c_report_incident_levels AS d', 'd.id', '=', 'a.level_id')
+                                ->leftJoin('tbl_a_countries AS e', 'e.id', '=', 'a.country_id')
+                                ->leftJoin('tbl_a_provinces AS f', 'f.id', '=', 'a.province_id')
+                                ->leftJoin('tbl_a_districts AS g', 'g.id', '=', 'a.district_id')
+                                ->leftJoin('tbl_a_sub_districts AS h', 'h.id', '=', 'a.sub_district_id')
+                                ->leftJoin('tbl_a_areas AS i', 'i.id', '=', 'a.area_id')
+                                ->limit($request->input('total'))->offset($offset)->get();
+            } else { 
+                $report_incidents = DB::table('tbl_c_report_incidents AS a')->select('a.id', 'a.title', 'a.description', 'additional_info', 'a.integrated_services_post_id', 'a.type_id', 'a.level_id', 'a.country_id', 'a.province_id', 'a.district_id', 'a.sub_district_id', 'a.area_id', 'a.is_active', 'a.created_by', 'a.created_date', 'c.name AS report_type_name', 'd.name AS ril_title', 'e.name AS country_name', 'f.name AS provinces_name', 'g.name AS district_name', 'h.name AS sub_district_name', 'i.name AS area_name')
+                                ->where([['a.is_active', 1], [$key, $opt, $val]])
+                                ->leftJoin('tbl_d_integrated_service_posts AS b', 'b.id', '=', 'a.integrated_services_post_id')
+                                ->leftJoin('tbl_c_report_types AS c', 'c.id', '=', 'a.type_id')
+                                ->leftJoin('tbl_c_report_incident_levels AS d', 'd.id', '=', 'a.level_id')
+                                ->leftJoin('tbl_a_countries AS e', 'e.id', '=', 'a.country_id')
+                                ->leftJoin('tbl_a_provinces AS f', 'f.id', '=', 'a.province_id')
+                                ->leftJoin('tbl_a_districts AS g', 'g.id', '=', 'a.district_id')
+                                ->leftJoin('tbl_a_sub_districts AS h', 'h.id', '=', 'a.sub_district_id')
+                                ->leftJoin('tbl_a_areas AS i', 'i.id', '=', 'a.area_id')
+                                ->limit($request->input('total'))->offset($offset)->get();
+            }
             if (isset($report_incidents) && !empty($report_incidents) && $report_incidents != null) {
                 $res = array();
+                $type = '';
                 if ($request->input('export')) {
                     if ($request->input('export') == 'excel') {
                         $type = 'excel';
@@ -59,58 +87,27 @@ class IncidentsController extends Controller {
                     }
                 }
                 foreach ($report_incidents AS $key => $value) {
-                    //get isp
-                    $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
-                    $isp = $Tbl_d_integrated_service_posts->find('first', array('fields' => 'all', 'table_name' => 'tbl_d_integrated_service_posts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->integrated_services_post_id . '"'))));
-
-                    //get type
-                    $Tbl_c_report_types = new Tbl_c_report_types();
-                    $report_type = $Tbl_c_report_types->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_types', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->type_id . '"'))));
-
-                    //get level
-                    $Tbl_c_report_incident_levels = new Tbl_c_report_incident_levels();
-                    $report_incident_level = $Tbl_c_report_incident_levels->find('first', array('fields' => 'all', 'table_name' => 'tbl_c_report_incident_levels', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->level_id . '"'))));
-
-                    //get country
-                    $Tbl_a_countries = new Tbl_a_countries();
-                    $country = $Tbl_a_countries->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_countries', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->country_id . '"'))));
-
-                    //get province
-                    $Tbl_a_provinces = new Tbl_a_provinces();
-                    $province = $Tbl_a_provinces->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_provinces', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->province_id . '"'))));
-
-                    //get district
-                    $Tbl_a_districts = new Tbl_a_districts();
-                    $district = $Tbl_a_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->district_id . '"'))));
-
-                    //get sub - district
-                    $Tbl_a_sub_districts = new Tbl_a_sub_districts();
-                    $sub_district = $Tbl_a_sub_districts->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_sub_districts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->sub_district_id . '"'))));
-
-                    //get area
-                    $Tbl_a_areas = new Tbl_a_areas();
-                    $area = $Tbl_a_areas->find('first', array('fields' => 'all', 'table_name' => 'tbl_a_areas', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $value->area_id . '"'))));
                     $result = array(
                         'id' => $value->id,
                         'title' => $value->title,
                         'description' => $value->description,
                         'additional_info' => $value->additional_info,
-                        'integrated_services_post_id' => $isp->id,
-                        'integrated_services_post_name' => $isp->name,
-                        'type_id' => $report_type->id,
-                        'type_name' => $report_type->name,
-                        'level_id' => $report_incident_level->id,
-                        'level_name' => $report_incident_level->title,
-                        'country_id' => $country->id,
-                        'country_name' => $country->name,
-                        'province_id' => $province->id,
-                        'province_name' => $province->name,
-                        'district_id' => $district->id,
-                        'district_name' => $district->name,
-                        'sub_district_id' => $sub_district->id,
-                        'sub_district_name' => $sub_district->name,
-                        'area_id' => $area->id,
-                        'area_name' => $area->name,
+                        'integrated_services_post_id' => $value->integrated_services_post_id,
+                        'integrated_services_post_name' => $value->ispName,
+                        'type_id' => $value->type_id,
+                        'type_name' => $value->report_type_name,
+                        'level_id' => $value->level_id,
+                        'level_name' => $value->ril_title,
+                        'country_id' => $value->id,
+                        'country_name' => $value->country_name,
+                        'province_id' => $value->province_id,
+                        'province_name' => $value->provinces_name,
+                        'district_id' => $value->district_id,
+                        'district_name' => $value->district_name,
+                        'sub_district_id' => $value->sub_district_id,
+                        'sub_district_name' => $value->sub_district_name,
+                        'area_id' => $value->area_id,
+                        'area_name' => $value->area_name,
                         'is_active' => $value->is_active,
                         'created_by' => $value->created_by,
                         'created_date' => $value->created_date,
@@ -133,10 +130,11 @@ class IncidentsController extends Controller {
                     $file_ = '';
                     $type = '';
                 }
+                $total_rows = DB::table('tbl_c_report_incidents')->count();
                 if ($request->input('export')) {
                     return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('export' => array($type => $file_)), 'data' => $res));
                 } else {
-                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
+                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('total_rows' => $total_rows), 'data' => $res));
                 }
             } else {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));

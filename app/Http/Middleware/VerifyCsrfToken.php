@@ -14,7 +14,11 @@ class VerifyCsrfToken extends Middleware
     protected $except = [
         'https://api.dasawisma.local/',
         'https://api.dasawisma.local/transmit/report-incidents',
+        'https://api.dasawisma.local/api/fetch/report-incidents',
         'https://api-dasawisma.orenoservices.com/',
-        'https://api-dasawisma.orenoservices.com/transmit/report-incidents'
+        'https://api-dasawisma.orenoservices.com/transmit/report-incidents',
+        'https://api-dasawisma.orenoservices.com/fetch/report-incidents',
+        'https://api.dasawisma.local/api',
+        'https://api-dasawisma.orenoservices.com/api',
     ];
 }
