@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 class CitizenController extends Controller {
 
     //put your code here
+    private $table = 'tbl_b_parents AS a';
 
     public function get_list(Request $request) {
         if (isset($this->user_token) && !empty($this->user_token)) {
@@ -46,12 +47,14 @@ class CitizenController extends Controller {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
-                $result = DB::table('tbl_b_parents AS a')->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+                $result = DB::table($this->table)->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where('a.is_active', 1)->count();
             } else {
-                $result = DB::table('tbl_b_parents AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
+                $result = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->count();
             }
             if ($result) {
-                return json_encode(array('status' => 200, 'message' => 'Success fetching data citizen', 'data' => $result));
+                return json_encode(array('status' => 200, 'message' => 'Success fetching data citizen', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $result));
             } else {
                 return json_encode(array('status' => 201, 'message' => 'Failed fetching data citizen', 'data' => null));
             }

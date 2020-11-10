@@ -9,7 +9,6 @@
 namespace App\Http\Controllers\Api\Reports;
 
 use App\Http\Controllers\Controller;
-use App\Model\Tbl_c_report_types;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 

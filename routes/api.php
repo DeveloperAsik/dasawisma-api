@@ -43,7 +43,6 @@ Route::get('/user-permissions', 'Api\Settings\UserController@get_user_permission
 Route::get('/fetch/about', 'Api\Content\AboutController@get_list')->name('get-about');
 
 Route::get('/fetch/content', 'Api\Content\ContentController@get_list')->name('get-list-content');
-Route::get('/find/content', 'Api\Content\ContentController@find')->name('get-content');
 
 //fetching data menu
 Route::get('/fetch/menu', 'Api\Prefferences\MenuController@get_list')->name('get-list-menu');
@@ -56,7 +55,6 @@ Route::get('/fetch/icon', 'Api\Master\IconController@get_list')->name('get-list-
 
 //fetching report
 Route::get('/fetch/report-incidents', 'Api\Reports\IncidentsController@get_list')->name('get-list-reports-incidents');
-Route::post('/fetch/report-incidents', 'Api\Reports\IncidentsController@get_list2')->name('get-list-reports-incidents2');
 Route::get('/fetch/report-incidents-logs', 'Api\Reports\IncidentsController@get_log_list')->name('get-reports-incidents-logs');
 Route::get('/find/report-incidents', 'Api\Reports\IncidentsController@find')->name('find-reports-incidents');
 Route::post('/transmit/report-incidents', 'Api\Reports\IncidentsController@insert')->name('transmit-report-incidents');
@@ -80,25 +78,21 @@ Route::post('/transmit/family', 'Api\Master\FamilyController@insert')->name('tra
  * fetching data location
  */
 Route::get('/fetch/countries', 'Api\Locations\CountryController@get_list')->name('get-list-country');
-//Route::post('/fetch/countries', 'Api\Locations\CountryController@find')->name('get-country');
 //
 Route::get('/fetch/provinces', 'Api\Locations\ProvinceController@get_list')->name('get-list-province');
-//Route::post('/fetch/provinces', 'Api\Locations\ProvinceController@find')->name('get-province');
 //
 Route::get('/fetch/districts', 'Api\Locations\DistrictController@get_list')->name('get-list-district');
-//Route::post('/fetch/districts', 'Api\Locations\DistrictController@find')->name('get-district');
 //
 Route::get('/fetch/sub-districts', 'Api\Locations\SubDistrictController@get_list')->name('get-list-sub-district');
-//Route::post('/fetch/sub-districts', 'Api\Locations\SubDistrictController@find')->name('get-sub-district');
 //
 Route::get('/fetch/areas', 'Api\Locations\AreaController@get_list')->name('get-list-area');
-Route::post('/find/areas', 'Api\Locations\AreaController@find')->name('find-area');
 
-//
+/*
+ * fetching data other incidents params
+ */
 Route::get('/fetch/isp', 'Api\Locations\IspController@get_list')->name('get-list-isp');
 //
 Route::get('/fetch/report-types', 'Api\Reports\TypesController@get_list')->name('get-list-report-types');
-//Route::post('/fetch/report-types', 'Api\Reports\TypesController@find')->name('get-report-types');
 //
 //
 Route::get('/fetch/report-level', 'Api\Reports\LevelController@get_list')->name('get-list-report-level');

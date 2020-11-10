@@ -12,17 +12,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Libraries\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Model\Tbl_user_tokens;
-use App\Model\Tbl_b_familes;
-use App\Model\Tbl_a_countries;
-use App\Model\Tbl_a_provinces;
-use App\Model\Tbl_a_districts;
-use App\Model\Tbl_a_sub_districts;
-use App\Model\Tbl_a_areas;
-use App\Model\Tbl_b_parents;
-use App\Model\Tbl_b_legal_id_numbers;
-use App\Model\Tbl_b_family_childs;
-use App\Model\Tbl_b_childrens;
 
 /**
  * Description of FamilyController
@@ -32,7 +21,7 @@ use App\Model\Tbl_b_childrens;
 class FamilyController extends Controller {
 
     //put your code here
-
+    private $table = 'tbl_b_familes AS a';
 
     public function get_list(Request $request) {
         if (isset($this->user_token) && !empty($this->user_token)) {
@@ -75,9 +64,11 @@ class FamilyController extends Controller {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
-                $family = DB::table('tbl_b_familes AS a')->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+                $family = DB::table($this->table)->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where('a.is_active', 1)->count();
             } else {
-                $family = DB::table('tbl_b_familes AS a')->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
+                $family = DB::table($this->table)->where('a.is_active', 1)->where($key, $opt, $val)->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->count();
             }
             $arr_families = array();
             if (isset($family) && !empty($family) && $family != null) {
@@ -163,7 +154,7 @@ class FamilyController extends Controller {
                 }
             }
             if (isset($arr_families) && !empty($arr_families) && $arr_families != null) {
-                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $arr_families));
+                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $arr_families));
             } else {
                 return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
             }
@@ -204,41 +195,36 @@ class FamilyController extends Controller {
     }
 
     public function insert(Request $request) {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
             $post = Request::post();
             if (isset($post) && !empty($post)) {
-                $Tbl_b_familes = new Tbl_b_familes();
                 //verify head of family is exist
-                $Tbl_b_parents = new Tbl_b_parents();
-                $father = $Tbl_b_parents->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_parents', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $post['head_of_family_id'] . '"'))));
+                $father = DB::table('tbl_b_parents AS a')->where([['a.is_active', 1], ['a.id', '=', $post['head_of_family_id']]])->where()->first();
                 $response = array();
                 if (!$father || $father == null) {
                     $response[] = 'id head of family is not found!, ';
                 }
                 //verify spouse is exist
-                $mother = $Tbl_b_parents->find('first', array('fields' => 'all', 'table_name' => 'tbl_b_parents', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $post['spouse_id'] . '"'))));
+                $mother = DB::table('tbl_b_parents AS a')->where([['a.is_active', 1], ['a.id', '=', $post['spouse_id']]])->where()->first();
                 if (!$mother || $mother == null) {
                     $response[] = 'id spouse is not found!, ';
                 }
                 if ($response == '' || empty($response)) {
-                    $arr_insert = array(
-                        "head_of_family_id" => $post['head_of_family_id'],
-                        "spouse_id" => $post['spouse_id'],
-                        "address" => $post['address'],
-                        "country_id" => $post['country_id'],
-                        "province_id" => $post['province_id'],
-                        "district_id" => $post['district_id'],
-                        "sub_district_id" => $post['sub_district_id'],
-                        "area_id" => $post['area_id'],
-                        "is_active" => 1,
-                        "created_by" => $user_token->user_id,
-                        "created_date" => Tools::getDateNow()
+                    $family = DB::table($this->table)->insertGetId(
+                            [
+                                "head_of_family_id" => $post['head_of_family_id'],
+                                "spouse_id" => $post['spouse_id'],
+                                "address" => $post['address'],
+                                "country_id" => $post['country_id'],
+                                "province_id" => $post['province_id'],
+                                "district_id" => $post['district_id'],
+                                "sub_district_id" => $post['sub_district_id'],
+                                "area_id" => $post['area_id'],
+                                "is_active" => 1,
+                                "created_by" => $this->user_token->user_id,
+                                "created_date" => Tools::getDateNow()
+                            ]
                     );
-
-                    $family = $Tbl_b_familes->insert_return_id($arr_insert);
                     if ($family) {
                         return json_encode(array('status' => 200, 'message' => 'Success transmit data into db', 'data' => array('id' => $family)));
                     } else {

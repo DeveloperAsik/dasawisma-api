@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 class ContentController extends Controller {
 
     //put your code here
+    private $table = 'tbl_contents AS a';
 
     public function get_list(Request $request) {
         if (isset($this->user_token) && !empty($this->user_token)) {
@@ -42,29 +43,34 @@ class ContentController extends Controller {
                 $key = 'e.name';
                 $val = $value;
                 $opt = '=';
-            }else{
+            } elseif ($keyword == 'all') {
+                $key = '';
+                $val = '';
+                $opt = '';
+            } else {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
-            if ($keyword) {
-                $contents = DB::table('tbl_contents AS a')->select('a.*', 'c.id AS image_id', 'c.name AS image_name', 'c.path AS image_path', 'e.id AS category_id', 'e.name AS category_name')
+            if ($keyword == 'all') {
+                $contents = DB::table($this->table)->select('a.*', 'c.id AS image_id', 'c.name AS image_name', 'c.path AS image_path', 'e.id AS category_id', 'e.name AS category_name')
                                 ->where('a.is_active', 1)
-                                ->orWhere($key, $opt, $val)
                                 ->leftJoin('tbl_content_images AS b', 'b.content_id', '=', 'a.id')
                                 ->leftJoin('tbl_content_mimages AS c', 'c.id', '=', 'b.image_id')
                                 ->leftJoin('tbl_content_categories AS d', 'd.content_id', '=', 'a.id')
                                 ->leftJoin('tbl_content_mcategories AS e', 'e.id', '=', 'd.category_id')
                                 ->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where('a.is_active', 1)->count();
             } else {
-                $contents = DB::table('tbl_contents AS a')->select('a.*', 'c.id AS image_id', 'c.name AS image_name', 'c.path AS image_path', 'e.id AS category_id', 'e.name AS category_name')
-                                ->where('a.is_active', 1)
+                $contents = DB::table($this->table)->select('a.*', 'c.id AS image_id', 'c.name AS image_name', 'c.path AS image_path', 'e.id AS category_id', 'e.name AS category_name')
+                                ->where([['a.is_active', 1], [$key, $opt, $val]])
                                 ->leftJoin('tbl_content_images AS b', 'b.content_id', '=', 'a.id')
                                 ->leftJoin('tbl_content_mimages AS c', 'c.id', '=', 'b.image_id')
                                 ->leftJoin('tbl_content_categories AS d', 'd.content_id', '=', 'a.id')
                                 ->leftJoin('tbl_content_mcategories AS e', 'e.id', '=', 'd.category_id')
                                 ->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->count();
             }
             if (isset($contents) && !empty($contents) && $contents != null) {
-                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $contents));
+                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $contents));
             } else {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
             }

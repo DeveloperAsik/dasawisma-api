@@ -10,8 +10,6 @@ namespace App\Http\Controllers\Api\Master;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Model\Tbl_user_tokens;
-use App\Model\Tbl_icons;
 
 /**
  * Description of IconController
@@ -21,43 +19,59 @@ use App\Model\Tbl_icons;
 class IconController extends Controller {
 
     //put your code here
+    private $table = 'tbl_icons AS a';
 
     public function get_list(Request $request) {
-        $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
-            $Tbl_icons = new Tbl_icons();
-            $res = $Tbl_icons->find('all', array('fields' => 'all', 'table_name' => 'tbl_icons', 'conditions' => array('where' => array('a.is_active' => '="1"'))));
-            if (isset($res) && !empty($res) && $res != null) {
-                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $offset = $request->input('page') - 1;
+            $value = $request->input('value');
+            $keyword = $request->input('keyword');
+            if ($keyword == 'name') {
+                $key = 'a.name';
+                $val = '%' . $value . '%';
+                $opt = 'like';
+            } elseif ($keyword == 'id') {
+                $key = 'a.id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'all') {
+                $key = '';
+                $val = '';
+                $opt = '';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving dataa', 'data' => null));
+                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+            }
+            if ($keyword == 'all') {
+                $res = DB::table($this->table)->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where('a.is_active', 1)->count();
+            } else {
+                $res = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->count();
+            }
+            if (isset($res) && !empty($res) && $res != null) {
+                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $res));
+            } else {
+                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+            return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
         }
     }
 
-    public function find() {
-        $token = $request->input('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
-            $get = $request->input();
-            if (isset($get) && !empty($get)) {
-                $id = base64_decode($get['id']);
-                $Tbl_icons = new Tbl_icons();
-                $res = $Tbl_icons->find('all', array('fields' => 'first', 'table_name' => 'tbl_icons', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $id . '"'))));
-                if (isset($res) && !empty($res) && $res != null) {
-                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
-                } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
-                }
-            }
-        } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
-        }
+    public function insert() {
+        
+    }
+
+    public function update() {
+        
+    }
+
+    public function delete() {
+        
+    }
+
+    public function remove() {
+        
     }
 
 }
