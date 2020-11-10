@@ -41,8 +41,8 @@ class ContentController extends Controller {
                 $opt = '=';
             } elseif ($keyword == 'category_name') {
                 $key = 'e.name';
-                $val = $value;
-                $opt = '=';
+                  $val = '%' . $value . '%';
+                $opt = 'like';
             } elseif ($keyword == 'all') {
                 $key = '';
                 $val = '';
@@ -58,7 +58,11 @@ class ContentController extends Controller {
                                 ->leftJoin('tbl_content_categories AS d', 'd.content_id', '=', 'a.id')
                                 ->leftJoin('tbl_content_mcategories AS e', 'e.id', '=', 'd.category_id')
                                 ->limit($request->input('total'))->offset($offset)->get();
-                $total_rows = DB::table($this->table)->where('a.is_active', 1)->count();
+                $total_rows = DB::table($this->table)->where('a.is_active', 1)
+                                ->leftJoin('tbl_content_images AS b', 'b.content_id', '=', 'a.id')
+                                ->leftJoin('tbl_content_mimages AS c', 'c.id', '=', 'b.image_id')
+                                ->leftJoin('tbl_content_categories AS d', 'd.content_id', '=', 'a.id')
+                                ->leftJoin('tbl_content_mcategories AS e', 'e.id', '=', 'd.category_id')->count();
             } else {
                 $contents = DB::table($this->table)->select('a.*', 'c.id AS image_id', 'c.name AS image_name', 'c.path AS image_path', 'e.id AS category_id', 'e.name AS category_name')
                                 ->where([['a.is_active', 1], [$key, $opt, $val]])
@@ -67,7 +71,11 @@ class ContentController extends Controller {
                                 ->leftJoin('tbl_content_categories AS d', 'd.content_id', '=', 'a.id')
                                 ->leftJoin('tbl_content_mcategories AS e', 'e.id', '=', 'd.category_id')
                                 ->limit($request->input('total'))->offset($offset)->get();
-                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->count();
+                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])
+                                ->leftJoin('tbl_content_images AS b', 'b.content_id', '=', 'a.id')
+                                ->leftJoin('tbl_content_mimages AS c', 'c.id', '=', 'b.image_id')
+                                ->leftJoin('tbl_content_categories AS d', 'd.content_id', '=', 'a.id')
+                                ->leftJoin('tbl_content_mcategories AS e', 'e.id', '=', 'd.category_id')->count();
             }
             if (isset($contents) && !empty($contents) && $contents != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $contents));

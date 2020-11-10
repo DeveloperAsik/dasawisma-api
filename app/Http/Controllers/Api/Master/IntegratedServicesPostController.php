@@ -10,9 +10,7 @@ namespace App\Http\Controllers\Api\Master;
 
 use App\Http\Controllers\Controller;
 use App\Http\Libraries\Tools;
-use App\Model\Tbl_user_tokens;
-use App\Model\Tbl_d_integrated_service_posts;
-use Request;
+use Illuminate\Http\Request;
 
 /**
  * Description of IntegratedServicesPostController
@@ -22,17 +20,37 @@ use Request;
 class IntegratedServicesPostController extends Controller {
 
     //put your code here
+    private $table = 'tbl_d_integrated_service_posts AS a';
 
-
-    public function get_list() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
-            $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
-            $res = $Tbl_d_integrated_service_posts->find('all', array('fields' => 'all', 'table_name' => 'tbl_d_integrated_service_posts', 'conditions' => array('where' => array('a.is_active' => '="1"'))));
+    public function get_list(Request $request) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
+            $offset = $request->input('page') - 1;
+            $value = $request->input('value');
+            $keyword = $request->input('keyword');
+            if ($keyword == 'name') {
+                $key = 'a.name';
+                $val = '%' . $value . '%';
+                $opt = 'like';
+            } elseif ($keyword == 'id') {
+                $key = 'a.id';
+                $val = $value;
+                $opt = '=';
+            } elseif ($keyword == 'all') {
+                $key = '';
+                $val = '';
+                $opt = '';
+            } else {
+                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+            }
+            if ($keyword == 'all') {
+                $res = DB::table($this->table)->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where('a.is_active', 1)->count();
+            } else {
+                $res = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->limit($request->input('total'))->offset($offset)->get();
+                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->count();
+            }
             if (isset($res) && !empty($res) && $res != null) {
-                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
+                return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $res));
             } else {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
             }
@@ -41,54 +59,30 @@ class IntegratedServicesPostController extends Controller {
         }
     }
 
-    public function find() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
-            $post = Request::post();
-            if (isset($post) && !empty($post)) {
-                $id = base64_decode($post['id']);
-                $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
-                $res = $Tbl_d_integrated_service_posts->find('all', array('fields' => 'all', 'table_name' => 'tbl_d_integrated_service_posts', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.id' => '="' . $id . '"'))));
-                if (isset($res) && !empty($res) && $res != null) {
-                    return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
-                } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
-                }
-            }
-        } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
-        }
-    }
-
     public function insert() {
-        $token = Request::header('token');
-        $Tbl_user_tokens = new Tbl_user_tokens();
-        $user_token = $Tbl_user_tokens->find('first', array('fields' => 'all', 'table_name' => 'tbl_user_tokens', 'conditions' => array('where' => array('a.is_active' => '="1"', 'a.token_generated' => '="' . $token . '"'))));
-        if (isset($user_token) && !empty($user_token)) {
+        if (isset($this->user_token) && !empty($this->user_token)) {
             $post = Request::post();
             if (isset($post) && !empty($post)) {
-                $arr_insert = array(
-                    "code" => $post['code'],
-                    "name" => $post['name'],
-                    "liable_by" => $post['liable_by'],
-                    "address" => $post['address'],
-                    "lat" => $post['lat'],
-                    "lng" => $post['lng'],
-                    "zoom" => $post['zoom'],
-                    "country_id" => $post['country_id'],
-                    "province_id" => $post['province_id'],
-                    "district_id" => $post['district_id'],
-                    "sub_district_id" => $post['sub_district_id'],
-                    "area_id" => $post['area_id'],
-                    "is_active" => 1,
-                    "created_by" => $user_token->user_id,
-                    "created_date" => Tools::getDateNow()
+                $arr_insert = DB::table($this->table)->insertGetId(
+                        [
+                            "code" => $post['code'],
+                            "name" => $post['name'],
+                            "liable_by" => $post['liable_by'],
+                            "address" => $post['address'],
+                            "lat" => $post['lat'],
+                            "lng" => $post['lng'],
+                            "zoom" => $post['zoom'],
+                            "country_id" => $post['country_id'],
+                            "province_id" => $post['province_id'],
+                            "district_id" => $post['district_id'],
+                            "sub_district_id" => $post['sub_district_id'],
+                            "area_id" => $post['area_id'],
+                            "is_active" => 1,
+                            "created_by" => $this->user_token->user_id,
+                            "created_date" => Tools::getDateNow()
+                        ]
                 );
-                $Tbl_d_integrated_service_posts = new Tbl_d_integrated_service_posts();
-                $res = $Tbl_d_integrated_service_posts->insert($arr_insert);
-                if ($res) {
+                if ($arr_insert) {
                     return json_encode(array('status' => 200, 'message' => 'Success transmit data into db', 'data' => true));
                 } else {
                     return json_encode(array('status' => 201, 'message' => 'Failed transmit data into db', 'data' => null));

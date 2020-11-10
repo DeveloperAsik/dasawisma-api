@@ -64,7 +64,16 @@ class ChildrenController extends Controller {
                         ->limit($request->input('total'))
                         ->offset($offset)
                         ->get();
-                $total_rows = DB::table($this->table)->where('a.is_active', 1)->count();
+                $total_rows = DB::table($this->table)->where('a.is_active', 1)
+                        ->leftJoin('tbl_b_family_childs AS b', 'b.child_id', '=', 'a.id')
+                        ->leftJoin('tbl_b_familes AS c', 'c.id', '=', 'b.family_id')
+                        ->leftJoin('tbl_b_parents AS d', 'd.id', '=', 'c.head_of_family_id')
+                        ->leftJoin('tbl_b_parents AS e', 'e.id', '=', 'c.spouse_id')
+                        ->leftJoin('tbl_a_countries AS f', 'f.id', '=', 'c.country_id')
+                        ->leftJoin('tbl_a_provinces AS g', 'g.id', '=', 'c.province_id')
+                        ->leftJoin('tbl_a_districts AS h', 'h.id', '=', 'c.district_id')
+                        ->leftJoin('tbl_a_sub_districts AS i', 'i.id', '=', 'c.sub_district_id')
+                        ->leftJoin('tbl_a_areas AS j', 'j.id', '=', 'c.area_id')->count();
             } else {
                 $result = DB::table($this->table)
                         ->select('a.*', 'c.address AS family_address', 'd.id AS father_code', 'd.first_name AS father_firstname', 'd.last_name AS father_lastname',
@@ -87,7 +96,16 @@ class ChildrenController extends Controller {
                         ->limit($request->input('total'))
                         ->offset($offset)
                         ->get();
-                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])->count();
+                $total_rows = DB::table($this->table)->where([['a.is_active', 1], [$key, $opt, $val]])
+                        ->leftJoin('tbl_b_family_childs AS b', 'b.child_id', '=', 'a.id')
+                        ->leftJoin('tbl_b_familes AS c', 'c.id', '=', 'b.family_id')
+                        ->leftJoin('tbl_b_parents AS d', 'd.id', '=', 'c.head_of_family_id')
+                        ->leftJoin('tbl_b_parents AS e', 'e.id', '=', 'c.spouse_id')
+                        ->leftJoin('tbl_a_countries AS f', 'f.id', '=', 'c.country_id')
+                        ->leftJoin('tbl_a_provinces AS g', 'g.id', '=', 'c.province_id')
+                        ->leftJoin('tbl_a_districts AS h', 'h.id', '=', 'c.district_id')
+                        ->leftJoin('tbl_a_sub_districts AS i', 'i.id', '=', 'c.sub_district_id')
+                        ->leftJoin('tbl_a_areas AS j', 'j.id', '=', 'c.area_id')->count();
             }
             if ($result) {
                 return json_encode(array('status' => 200, 'message' => 'Success fetching data children', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $result));
