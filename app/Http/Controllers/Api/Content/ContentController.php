@@ -47,8 +47,6 @@ class ContentController extends Controller {
                 $key = '';
                 $val = '';
                 $opt = '';
-            } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
                 $contents = DB::table($this->table)->select('a.*', 'c.id AS image_id', 'c.name AS image_name', 'c.path AS image_path', 'e.id AS category_id', 'e.name AS category_name')

@@ -22,7 +22,7 @@ class CitizenController extends Controller {
     //put your code here
     private $table = 'tbl_b_parents AS a';
 
-    public function get_list(Request $request) {
+    public function get_list(Request $request, $gender = null) {
         if (isset($this->user_token) && !empty($this->user_token)) {
             $offset = $request->input('page') - 1;
             $value = $request->input('value');
@@ -42,6 +42,10 @@ class CitizenController extends Controller {
             } elseif ($keyword == 'all') {
                 $key = '';
                 $val = '';
+                $opt = '=';
+            }elseif($gender && $gender != null){
+                $key = 'a.sex';
+                $val = $gender;
                 $opt = '=';
             } else {
                 return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));

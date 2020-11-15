@@ -68,6 +68,7 @@ Route::get('/latest/activity', 'Api\Settings\UserController@get_latest_activity'
 
 //fetching citizen
 Route::get('/fetch/citizen', 'Api\Master\CitizenController@get_list')->name('get-list-citizen');
+Route::get('/fetch/citizen/{gender}', 'Api\Master\CitizenController@get_list')->name('get-list-citizen-gender');
 
 //fetching children
 Route::get('/fetch/children', 'Api\Master\ChildrenController@get_list')->name('get-list-children');
@@ -98,7 +99,6 @@ Route::get('/fetch/areas', 'Api\Locations\AreaController@get_list')->name('get-l
 Route::get('/fetch/isp', 'Api\Locations\IspController@get_list')->name('get-list-isp');
 //
 Route::get('/fetch/report-types', 'Api\Reports\TypesController@get_list')->name('get-list-report-types');
-//
 //
 Route::get('/fetch/report-level', 'Api\Reports\LevelController@get_list')->name('get-list-report-level');
 /* 
