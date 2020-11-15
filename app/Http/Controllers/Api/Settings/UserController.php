@@ -96,7 +96,7 @@ class UserController extends Controller {
                 if ($validate->status == 200) {
                     return json_encode(array('status' => 200, 'message' => 'success', 'data' => array('token' => $validate->data->token)));
                 } else {
-                    return json_encode(array('status' => 404, 'message' => 'wrong password', 'data' => null));
+                    return json_encode(array('status' => 404, 'message' => $validate->message, 'data' => null));
                 }
             } else {
                 return response()->json(['status' => 404, 'message' => 'you send empty params', 'data' => null]);
@@ -112,7 +112,10 @@ class UserController extends Controller {
             if (isset($data['email']) && !empty($data['email'])) {
                 $user_exist = DB::table('tbl_users')->where('email', $data['email'])->first();
             } else {
-                $user_exist = DB::table('tbl_users')->orWhere('username', $data['userid'])->orWhere('code', $data['userid'])->first();
+                $user_exist = DB::table('tbl_users')->where('username', $data['userid'])->orWhere('code', $data['userid'])->first();
+            }
+            if ($user_exist == null) {
+                return json_encode(array('status' => 404, 'message' => 'cannot find username/email or id user in db'));
             }
             $res = $this->__verify_hash($data['password'], $user_exist->password);
             if ($res == true) {
@@ -120,15 +123,14 @@ class UserController extends Controller {
                 if ($token['status'] == 200) {
                     $generated_token = DB::table('tbl_user_tokens AS a')->where('a.is_active', 1)->where('a.token_generated', $token['data'][0]->token_generated)->first();
                     DB::table('tbl_user_tokens AS a')->where('a.user_id', $user_exist->id)->update(['a.is_guest' => 0]);
-                    $return = json_encode(array('status' => 200, 'message' => 'success generate token', 'data' => array('token' => $generated_token->token_generated)));
+                    return json_encode(array('status' => 200, 'message' => 'success generate token', 'data' => array('token' => $generated_token->token_generated)));
                 } else {
-                    $return = json_encode(array('status' => 404, 'message' => 'generate token failed'));
+                    return json_encode(array('status' => 404, 'message' => 'generate token failed'));
                 }
             } else {
-                $return = json_encode(array('status' => 404, 'message' => 'generate token failed'));
+                return json_encode(array('status' => 404, 'message' => 'generate token failed'));
             }
         }
-        return $return;
     }
 
     protected function __verify_hash($password_raw, $password_hash) {

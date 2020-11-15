@@ -39,6 +39,11 @@ Route::get('/is-logged-in', 'Api\Settings\UserController@is_logged_in')->name('i
 Route::get('/user-details', 'Api\Settings\UserController@get_user_details')->name('get-user-details');
 Route::get('/user-permissions', 'Api\Settings\UserController@get_user_permissions')->name('get-user-permissions');
 
+//fetching contact us
+Route::get('/fetch/contact-us', 'Api\Settings\ContactController@get_list')->name('get-list-contact-us');
+Route::post('/transmit/contact-us', 'Api\Settings\ContactController@insert')->name('transmit-contact-us');
+
+
 //fetching data news/carousel/homepage content
 Route::get('/fetch/about', 'Api\Content\AboutController@get_list')->name('get-about');
 
