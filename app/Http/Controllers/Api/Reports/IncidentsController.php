@@ -129,9 +129,9 @@ class IncidentsController extends Controller {
 
     public function insert(Request $request) {
         if (isset($this->user_token) && !empty($this->user_token)) {
-            $post = Request::post();
+            $post = $request->post();
             if (isset($post) && !empty($post)) {
-                $report = DB::table($this->table)->insertGetId(
+                $report = DB::table('tbl_c_report_incidents')->insertGetId(
                         [
                             "title" => $post['title'],
                             "description" => $post['description'],
