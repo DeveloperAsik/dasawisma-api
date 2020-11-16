@@ -128,7 +128,7 @@ class UserController extends Controller {
                     return json_encode(array('status' => 404, 'message' => 'generate token failed'));
                 }
             } else {
-                return json_encode(array('status' => 404, 'message' => 'generate token failed'));
+                return json_encode(array('status' => 500, 'message' => 'Password is not match within db system'));
             }
         }
     }
