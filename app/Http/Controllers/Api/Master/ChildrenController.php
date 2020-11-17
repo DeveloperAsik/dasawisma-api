@@ -40,7 +40,7 @@ class ChildrenController extends Controller {
                 $val = '';
                 $opt = '';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
                 $result = DB::table($this->table)
@@ -110,7 +110,7 @@ class ChildrenController extends Controller {
             if ($result) {
                 return json_encode(array('status' => 200, 'message' => 'Success fetching data children', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $result));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed fetching data children', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed fetching data children', 'data' => null));
             }
         }
     }

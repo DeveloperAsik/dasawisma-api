@@ -52,7 +52,7 @@ class PropertyController extends Controller {
                 $val = '';
                 $opt = '';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
                 $res = DB::table($this->table)->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
@@ -96,7 +96,7 @@ class PropertyController extends Controller {
                 }
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $res));
             }
-            return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token mismatch or expired', 'data' => null));
         } else {
             return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
@@ -134,7 +134,7 @@ class PropertyController extends Controller {
                 if ($res) {
                     return json_encode(array('status' => 200, 'message' => 'Success transmit data into db', 'data' => array('id' => $res)));
                 } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed transmit data into db', 'data' => null));
+                    return json_encode(array('status' => 500, 'message' => 'Failed transmit data into db', 'data' => null));
                 }
             }
         } else {

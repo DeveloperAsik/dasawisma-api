@@ -36,10 +36,10 @@ class UserController extends Controller {
             if ($validate) {
                 return json_encode(array('status' => 200, 'message' => 'success', 'data' => array('token' => $validate->token_generated)));
             } else {
-                return json_encode(array('status' => 404, 'message' => 'wrong password', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'wrong password', 'data' => null));
             }
         } else {
-            return response()->json(['status' => 404, 'message' => 'you send empty params', 'data' => null]);
+            return response()->json(['status' => 500, 'message' => 'you send empty params', 'data' => null]);
         }
     }
 
@@ -96,13 +96,13 @@ class UserController extends Controller {
                 if ($validate->status == 200) {
                     return json_encode(array('status' => 200, 'message' => 'success', 'data' => array('token' => $validate->data->token)));
                 } else {
-                    return json_encode(array('status' => 404, 'message' => $validate->message, 'data' => null));
+                    return json_encode(array('status' => 500, 'message' => $validate->message, 'data' => null));
                 }
             } else {
-                return response()->json(['status' => 404, 'message' => 'you send empty params', 'data' => null]);
+                return response()->json(['status' => 500, 'message' => 'you send empty params', 'data' => null]);
             }
         } else {
-            return response()->json(['status' => 404, 'message' => 'you send empty deviceid', 'data' => null]);
+            return response()->json(['status' => 500, 'message' => 'you send empty deviceid', 'data' => null]);
         }
     }
 
@@ -115,7 +115,7 @@ class UserController extends Controller {
                 $user_exist = DB::table('tbl_users')->where('username', $data['userid'])->orWhere('code', $data['userid'])->first();
             }
             if ($user_exist == null) {
-                return json_encode(array('status' => 404, 'message' => 'cannot find username/email or id user in db'));
+                return json_encode(array('status' => 500, 'message' => 'cannot find username/email or id user in db'));
             }
             $res = $this->__verify_hash($data['password'], $user_exist->password);
             if ($res == true) {
@@ -125,7 +125,7 @@ class UserController extends Controller {
                     DB::table('tbl_user_tokens AS a')->where('a.user_id', $user_exist->id)->update(['a.is_guest' => 0]);
                     return json_encode(array('status' => 200, 'message' => 'success generate token', 'data' => array('token' => $generated_token->token_generated)));
                 } else {
-                    return json_encode(array('status' => 404, 'message' => 'generate token failed'));
+                    return json_encode(array('status' => 500, 'message' => 'generate token failed'));
                 }
             } else {
                 return json_encode(array('status' => 500, 'message' => 'Password is not match within db system'));
@@ -224,7 +224,7 @@ class UserController extends Controller {
                         ]
                 );
             }
-            $res_user_tokens = array('status' => 404, 'message' => 'failed generated token', 'data' => 'null');
+            $res_user_tokens = array('status' => 500, 'message' => 'failed generated token', 'data' => 'null');
             if ($user_token) {
                 $res_data = DB::table('tbl_user_tokens AS a')->select('a.*')->where('a.is_active', 1)->Where('a.id', $user_token)->get();
                 $res_user_tokens = array('status' => 200, 'message' => 'succesfully generated token', 'data' => $res_data);
@@ -246,7 +246,7 @@ class UserController extends Controller {
             Auth::session_data_clear($this->user_token);
             return json_encode(array('status' => 200, 'message' => 'Successfully delete user session', 'data' => null));
         } else {
-            return json_encode(array('status' => 404, 'message' => 'Failed, token invalid', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Failed, token invalid', 'data' => null));
         }
     }
 
@@ -280,7 +280,7 @@ class UserController extends Controller {
             );
             return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Failed retrieving data', 'data' => null));
         }
     }
 
@@ -296,7 +296,7 @@ class UserController extends Controller {
                     ->get();
             return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Failed retrieving data', 'data' => null));
         }
     }
 
@@ -308,10 +308,10 @@ class UserController extends Controller {
             if ($verify_password) {
                 return json_encode(array('status' => 200, 'message' => 'you are password is correct', 'valid' => $verify_password));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Your password is not matched to any our database.', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Your password is not matched to any our database.', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'youre not in logged in session', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'youre not in logged in session', 'data' => null));
         }
     }
 
@@ -326,7 +326,7 @@ class UserController extends Controller {
                 return json_encode(array('status' => 200, 'message' => 'Successfully change password user', 'data' => array('id' => $this->user_token->user_id, 'email' => $user->email)));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed, token invalid', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Failed, token invalid', 'data' => null));
         }
     }
 

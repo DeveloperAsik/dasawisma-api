@@ -61,7 +61,7 @@ class FamilyController extends Controller {
                 $val = '';
                 $opt = '';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
                 $family = DB::table($this->table)->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
@@ -156,10 +156,10 @@ class FamilyController extends Controller {
             if (isset($arr_families) && !empty($arr_families) && $arr_families != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $arr_families));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Token mismatch or expired', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Failed retrieving data', 'data' => null));
         }
     }
 
@@ -176,7 +176,7 @@ class FamilyController extends Controller {
                 $val = $value;
                 $opt = '=';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             $person = DB::table('tbl_b_parents AS a')->where('a.is_active', 1)->where($key, $opt, $val)->first();
             $arr_person = array();
@@ -190,7 +190,7 @@ class FamilyController extends Controller {
             }
             return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $arr_person));
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, post data empty', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, post data empty', 'data' => null));
         }
     }
 
@@ -228,7 +228,7 @@ class FamilyController extends Controller {
                     if ($family) {
                         return json_encode(array('status' => 200, 'message' => 'Success transmit data into db', 'data' => array('id' => $family)));
                     } else {
-                        return json_encode(array('status' => 201, 'message' => 'Failed transmit data into db', 'data' => null));
+                        return json_encode(array('status' => 500, 'message' => 'Failed transmit data into db', 'data' => null));
                     }
                 } else {
                     return json_encode(array('status' => 202, 'message' => 'Failed transmit data into db', 'data' => $response));

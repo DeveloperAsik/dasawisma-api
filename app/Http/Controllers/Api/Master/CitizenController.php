@@ -48,7 +48,7 @@ class CitizenController extends Controller {
                 $val = $gender;
                 $opt = '=';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
                 $result = DB::table($this->table)->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
@@ -60,7 +60,7 @@ class CitizenController extends Controller {
             if ($result) {
                 return json_encode(array('status' => 200, 'message' => 'Success fetching data citizen', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $result));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed fetching data citizen', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed fetching data citizen', 'data' => null));
             }
         }
     }

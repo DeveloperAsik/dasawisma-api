@@ -29,10 +29,10 @@ class AboutController extends Controller {
             if (isset($data) && !empty($data) && $data != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $data));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, token not match', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, token not match', 'data' => null));
         }
     }
 

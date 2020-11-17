@@ -34,7 +34,7 @@ class MenuController extends Controller {
             $get = $request->input();
             return Controller::initMenu($get, 'json');
         } else {
-            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
     }
 
@@ -76,11 +76,11 @@ class MenuController extends Controller {
                     }
                     return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $child));
                 } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, or data not found', 'data' => null));
+                    return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, or data not found', 'data' => null));
                 }
             }
         } else {
-            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
     }
 
@@ -137,11 +137,11 @@ class MenuController extends Controller {
                 if (isset($res) && !empty($res) && $res != null) {
                     return json_encode(array('status' => 200, 'message' => 'Successfully insert data.', 'data' => ['id' => $res]));
                 } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed insert data, or data not empty', 'data' => null));
+                    return json_encode(array('status' => 500, 'message' => 'Failed insert data, or data not empty', 'data' => null));
                 }
             }
         } else {
-            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
     }
 
@@ -168,11 +168,11 @@ class MenuController extends Controller {
                 if (isset($res) && !empty($res) && $res != null) {
                     return json_encode(array('status' => 200, 'message' => 'Successfully update data.', 'data' => ['id' => $res]));
                 } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed insert data, or data not empty', 'data' => null));
+                    return json_encode(array('status' => 500, 'message' => 'Failed insert data, or data not empty', 'data' => null));
                 }
             }
         } else {
-            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
     }
 

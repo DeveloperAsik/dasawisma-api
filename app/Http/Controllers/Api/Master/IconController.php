@@ -39,7 +39,7 @@ class IconController extends Controller {
                 $val = '';
                 $opt = '';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
                 $res = DB::table($this->table)->where('a.is_active', 1)->limit($request->input('total'))->offset($offset)->get();
@@ -51,10 +51,10 @@ class IconController extends Controller {
             if (isset($res) && !empty($res) && $res != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $res));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token mismatch or expired', 'data' => null));
         }
     }
 

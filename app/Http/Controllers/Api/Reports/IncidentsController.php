@@ -44,7 +44,7 @@ class IncidentsController extends Controller {
                 $val = '';
                 $opt = '';
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, param not specified', 'data' => null));
             }
             if ($keyword == 'all') {
                 $report_incidents = DB::table($this->table)->select('a.id', 'a.title', 'a.description', 'additional_info', 'a.integrated_services_post_id', 'a.type_id', 'a.level_id', 'a.country_id', 'a.province_id', 'a.district_id', 'a.sub_district_id', 'a.area_id', 'a.is_active', 'a.created_by', 'a.created_date', 'b.name AS ispName', 'c.name AS report_type_name', 'd.name AS ril_title', 'e.name AS country_name', 'f.name AS provinces_name', 'g.name AS district_name', 'h.name AS sub_district_name', 'i.name AS area_name')
@@ -120,10 +120,10 @@ class IncidentsController extends Controller {
                 }
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows, 'export' => array($type => $file_)), 'data' => $res));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Token miss match or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token miss match or expired', 'data' => null));
         }
     }
 
@@ -152,11 +152,11 @@ class IncidentsController extends Controller {
                 if ($report) {
                     return json_encode(array('status' => 200, 'message' => 'Success transmit data into db', 'data' => array('id' => $report)));
                 } else {
-                    return json_encode(array('status' => 201, 'message' => 'Failed transmit data into db', 'data' => null));
+                    return json_encode(array('status' => 500, 'message' => 'Failed transmit data into db', 'data' => null));
                 }
             }
         } else {
-            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
     }
 
@@ -175,10 +175,10 @@ class IncidentsController extends Controller {
             if ($response) {
                 return json_encode(array('status' => 200, 'message' => 'Success fetching data report log', 'data' => $response));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed fetching data report log', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed fetching data report log', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 202, 'message' => 'Token is miss matched or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token is miss matched or expired', 'data' => null));
         }
     }
 

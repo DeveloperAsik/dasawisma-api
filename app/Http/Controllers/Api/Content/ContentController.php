@@ -78,10 +78,10 @@ class ContentController extends Controller {
             if (isset($contents) && !empty($contents) && $contents != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'meta' => array('page' => $request->input('page'), 'length' => $request->input('total'), 'total_data' => $total_rows), 'data' => $contents));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Failed retrieving data, token not match', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Failed retrieving data, token not match', 'data' => null));
         }
     }
 

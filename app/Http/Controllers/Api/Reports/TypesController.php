@@ -48,10 +48,10 @@ class TypesController extends Controller {
             if (isset($res) && !empty($res) && $res != null) {
                 return json_encode(array('status' => 200, 'message' => 'Successfully retrieving data.', 'data' => $res));
             } else {
-                return json_encode(array('status' => 201, 'message' => 'Failed retrieving data', 'data' => null));
+                return json_encode(array('status' => 500, 'message' => 'Failed retrieving data', 'data' => null));
             }
         } else {
-            return json_encode(array('status' => 201, 'message' => 'Token mismatch or expired', 'data' => null));
+            return json_encode(array('status' => 500, 'message' => 'Token mismatch or expired', 'data' => null));
         }
     }
 
